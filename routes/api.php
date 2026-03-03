@@ -15,6 +15,9 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
     // Books
     Route::get('books', [BookController::class, 'index']);
+    Route::put('books/{book}', [BookController::class, 'update']);
+
+    //prestamos
     Route::get('loans', [LoanController::class, 'index']);
     Route::post('loans', [LoanController::class, 'store']);
     Route::post('loans/{loan}/return', ReturnLoanController::class);
