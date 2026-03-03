@@ -15,6 +15,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
     // Books
     Route::get('books', [BookController::class, 'index']);
+    Route::delete('books/{book}', [BookController::class, 'destroy']);
     Route::get('loans', [LoanController::class, 'index']);
     Route::post('loans', [LoanController::class, 'store']);
     Route::post('loans/{loan}/return', ReturnLoanController::class);
