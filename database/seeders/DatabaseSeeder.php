@@ -15,6 +15,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Crear usuarios de prueba
+        User::factory(10)->create();
+
+        // Crear un usuario específico para testing
+        User::factory()->create([
+            'name' => 'Admin User',
+            'email' => 'admin@biblioteca.com',
+            'password' => bcrypt('password123'),
+        ]);
+
         $this->call([
             BookSeeder::class,
         ]);

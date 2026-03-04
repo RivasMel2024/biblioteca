@@ -81,4 +81,26 @@ class BookController extends Controller
             ], 500);
         }
     }
+    
+    //solo los bibliotecarios pueden actualizar     
+    public function update(Request $request, Book $book)
+    {
+        $this->authorize('update', $book);
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'ISBN' => 'required|string|max:20|unique:books,ISBN,'.$book->id,
+            'total_copies' => 'required|integer|min:1',
+            'available_copies' => 'required|integer|min:0|lte:total_copies',
+            'is_available' => 'required|boolean',
+        ]);
+
+        $book->update($validated);
+
+        return response()->json([
+            'message' => 'el libro fue actualizado exitosamente',
+            'data' => new BookResource($book),
+        ]);
+    }
 }

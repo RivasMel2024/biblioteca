@@ -28,7 +28,7 @@ class BookPolicy
      */
     public function create(User $user): bool
     {
-        return true;
+        return $user->hasRole('bibliotecario');
     }
 
     /**
@@ -44,7 +44,7 @@ class BookPolicy
      */
     public function delete(User $user, Book $book): bool
     {
-        return true;
+        return $user->hasRole('bibliotecario');
     }
 
     /**
