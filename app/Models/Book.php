@@ -18,6 +18,10 @@ class Book extends Model
         'is_available',
     ];
 
+    protected $casts = [    //agregue este cast para que el avilable sea un booleano para la prueba 
+        'is_available' => 'boolean',
+    ];
+
     public function loans()
     {
         return $this->hasMany(Loan::class);
