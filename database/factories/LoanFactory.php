@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Book;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,7 +18,9 @@ class LoanFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'requester_name' => $this->faker->name(),
+            'book_id' => Book::factory(),
+            'return_at' => null,
         ];
     }
 }

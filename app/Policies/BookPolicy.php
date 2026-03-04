@@ -52,7 +52,7 @@ class BookPolicy
      */
     public function restore(User $user, Book $book): bool
     {
-        return true;
+        return $user->hasRole('bibliotecario');
     }
 
     /**
@@ -60,6 +60,6 @@ class BookPolicy
      */
     public function forceDelete(User $user, Book $book): bool
     {
-        return true;
+        return $user->hasRole('bibliotecario');
     }
 }

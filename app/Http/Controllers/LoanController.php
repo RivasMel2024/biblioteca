@@ -12,9 +12,12 @@ class LoanController extends Controller
 {
     /**
      * Display a listing of the resource.
+     * Bibliotecarios, estudiantes y docentes pueden ver préstamos.
      */
     public function index()
     {
+        $this->authorize('viewAny', Loan::class);
+
         $loans = Loan::with('book')->paginate();
 
         return response()->json(LoanResource::collection($loans));
@@ -22,9 +25,12 @@ class LoanController extends Controller
 
     /**
      * Store a newly created resource in storage.
+     * Solo estudiantes y docentes pueden solicitar préstamos.
      */
     public function store(StoreLoanRequest $request)
     {
+        $this->authorize('create', Loan::class);
+
         $book = Book::find($request->input('book_id'));
 
         if (! $book->is_available || $book->available_copies === 0) {

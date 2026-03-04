@@ -10,9 +10,11 @@ class ReturnLoanController extends Controller
 {
     /**
      * Handle the incoming request.
+     * Estudiantes, docentes y bibliotecarios pueden devolver libros.
      */
     public function __invoke(Request $request, Loan $loan)
     {
+        $this->authorize('return', $loan);
 
         if (! is_null($loan->return_at)) {
             return response()->json(['message' => 'Loan already returned'], 422);
