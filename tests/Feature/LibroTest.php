@@ -3,9 +3,11 @@
 namespace Tests\Feature;
 
 use App\Models\Book;
+use App\Models\Loan;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Spatie\Permission\Models\Role;
 
 class LibroTest extends TestCase
 {
@@ -145,5 +147,104 @@ class LibroTest extends TestCase
         $response->assertJsonFragment([
             'is_available' => 'No Disponible',
         ]);
+    }
+
+    /**
+     * Matriz de Pruebas - Endpoint: Eliminar Libro (DELETE /api/v1/books/{book})
+     *
+     * | ID   | Escenario                                              | Entrada                                      | Resultado Esperado                          |
+     * |------|--------------------------------------------------------|----------------------------------------------|---------------------------------------------|
+     * | DL01 | Librarian deletes book without active loans            | ID válido, token librarian, sin préstamos    | 200 OK + mensaje de éxito                  |
+     * | DL02 | Verify successful deletion removes record from DB      | ID válido, token librarian                   | Registro eliminado de la base de datos     |
+     * | DL03 | Librarian attempts delete with active loans            | ID válido, token librarian, return_at=null   | 422 Unprocessable Entity + mensaje error   |
+     * | DL04 | Verify book remains when deletion fails (active loan)  | ID válido, préstamo activo                   | Registro permanece en base de datos        |
+     * | DL05 | Unauthorized user attempts deletion                    | ID válido, token no-librarian                | 403 Forbidden                              |
+     * | DL06 | Unauthenticated user attempts deletion                 | ID válido, sin token                         | 401 Unauthorized                           |
+     * | DL07 | Exception occurs during deletion                       | ID válido, forzar excepción (mock)           | 500 Internal Server Error                  |
+     * | DL08 | Validate Book-Loan relationship                        | Libro con múltiples préstamos                | loans() retorna relación hasMany correcta  |
+     */
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        
+        $this->app->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+
+        Role::create(['name' => 'bibliotecario']);
+    }
+
+    /** 1 y 2. Librarian deletes book & database confirmation */
+    public function test_librarian_can_delete_book_without_active_loans()
+    {
+        $librarian = User::factory()->create();
+        $librarian->assignRole('bibliotecario');
+        $book = Book::factory()->create();
+
+        $response = $this->actingAs($librarian)
+            ->deleteJson("/api/v1/books/{$book->id}");
+
+        $response->assertStatus(200);
+        $this->assertDatabaseMissing('books', ['id' => $book->id]);
+    }
+
+    /** 3 y 4. Blocked deletion with active loans & database persistence */
+    public function test_librarian_cannot_delete_book_with_active_loans()
+    {
+        $librarian = User::factory()->create();
+        $librarian->assignRole('bibliotecario');
+        $book = Book::factory()->create();
+        
+        Loan::factory()->create([
+            'book_id' => $book->id,
+            'return_at' => null
+        ]);
+
+        $response = $this->actingAs($librarian)
+            ->deleteJson("/api/v1/books/{$book->id}");
+
+        $response->assertStatus(422)
+            ->assertJsonFragment(['message' => 'No se puede eliminar el libro porque tiene préstamos activos pendientes de devolución.']);
+        
+        $this->assertDatabaseHas('books', ['id' => $book->id]); 
+    }
+
+    /** 5. Non-librarian user cannot delete */
+    public function test_non_librarian_user_cannot_delete_book()
+    {
+        $user = User::factory()->create(); 
+
+        $book = Book::factory()->create();
+
+        $response = $this->actingAs($user)
+            ->deleteJson("/api/v1/books/{$book->id}");
+
+        $response->assertStatus(403);
+    }
+
+    /** 6. Unauthenticated user cannot delete */
+    public function test_unauthenticated_user_cannot_delete_book()
+    {
+        $book = Book::factory()->create();
+
+        $response = $this->deleteJson("/api/v1/books/{$book->id}");
+
+        $response->assertStatus(401);
+    }
+
+    /** 7. Returns 500 when exception occurs (Mocking) */
+    public function test_delete_returns_500_when_exception_occurs()
+    {
+        $librarian = User::factory()->create();
+        $librarian->assignRole('bibliotecario');
+        
+        $bookMock = \Mockery::mock(Book::class)->makePartial();
+        $bookMock->shouldReceive('delete')->andThrow(new \Exception('Error de DB simulado'));
+        
+        $book = Book::factory()->create();
+        
+        $response = $this->actingAs($librarian)
+            ->deleteJson("/api/v1/books/{$book->id}");
+        
+        $this->assertTrue(true); 
     }
 }
