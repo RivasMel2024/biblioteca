@@ -16,6 +16,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     // Books
     Route::get('books', [BookController::class, 'index']); // listado de libros
     Route::post('books', [BookController::class, 'store']); // crear libro
+    Route::delete('books/{book}', [BookController::class, 'destroy']); // eliminar libro
     
 
     // Loans
