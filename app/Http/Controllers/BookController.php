@@ -102,5 +102,12 @@ class BookController extends Controller
             'message' => 'el libro fue actualizado exitosamente',
             'data' => new BookResource($book),
         ]);
+    } 
+    
+    public function show(Book $book)
+    {
+        $this->authorize('view', $book);
+
+        return response()->json(new BookResource($book));
     }
 }
