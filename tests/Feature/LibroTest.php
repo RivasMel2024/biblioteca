@@ -38,18 +38,15 @@ class LibroTest extends TestCase
 
     public function test_usuario_autenticado_puede_ver_detalle_libro()
     {
-        // Preparacion
         $user = User::factory()->create();
         $book = Book::factory()->create([
             'title' => 'El Quijote',
             'ISBN' => '9788420412146',
         ]);
 
-        // Ejecucion
         $response = $this->actingAs($user)
             ->getJson("/api/v1/books/{$book->id}");
 
-        // Verificacion
         $response->assertStatus(200);
         $response->assertJsonFragment([
             'id' => $book->id,
@@ -60,15 +57,12 @@ class LibroTest extends TestCase
 
     public function test_estructura_respuesta_detalle_libro()
     {
-        // Preparacion
         $user = User::factory()->create();
         $book = Book::factory()->create();
 
-        // Ejecucion
         $response = $this->actingAs($user)
             ->getJson("/api/v1/books/{$book->id}");
 
-        // Verificacion
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'id',
@@ -83,56 +77,44 @@ class LibroTest extends TestCase
 
     public function test_usuario_no_autenticado_no_puede_ver_detalle_libro()
     {
-        // Preparacion
         $book = Book::factory()->create();
 
-        // Ejecucion
         $response = $this->getJson("/api/v1/books/{$book->id}");
 
-        // Verificacion
         $response->assertStatus(401);
     }
 
     public function test_libro_no_encontrado_retorna_404()
     {
-        // Preparacion
         $user = User::factory()->create();
         $idInexistente = 99999;
 
-        // Ejecucion
         $response = $this->actingAs($user)
             ->getJson("/api/v1/books/{$idInexistente}");
 
-        // Verificacion
         $response->assertStatus(404);
     }
 
     public function test_id_invalido_retorna_404()
     {
-        // Preparacion
         $user = User::factory()->create();
 
-        // Ejecucion
         $response = $this->actingAs($user)
             ->getJson('/api/v1/books/abc-invalid');
 
-        // Verificacion
         $response->assertStatus(404);
     }
 
     public function test_libro_disponible_muestra_estado_disponible()
     {
-        // Preparacion
         $user = User::factory()->create();
         $book = Book::factory()->create([
             'is_available' => true,
         ]);
 
-        // Ejecucion
         $response = $this->actingAs($user)
             ->getJson("/api/v1/books/{$book->id}");
 
-        // Verificacion
         $response->assertStatus(200);
         $response->assertJsonFragment([
             'is_available' => 'Disponible',
@@ -141,17 +123,14 @@ class LibroTest extends TestCase
 
     public function test_libro_no_disponible_muestra_estado_no_disponible()
     {
-        // Preparacion
         $user = User::factory()->create();
         $book = Book::factory()->create([
             'is_available' => false,
         ]);
 
-        // Ejecucion
         $response = $this->actingAs($user)
             ->getJson("/api/v1/books/{$book->id}");
 
-        // Verificacion
         $response->assertStatus(200);
         $response->assertJsonFragment([
             'is_available' => 'No Disponible',
@@ -186,7 +165,6 @@ class LibroTest extends TestCase
 
     public function test_it_can_create_a_book()
     {
-        // Preparacion
         $user = User::factory()->create();
         $user->assignRole('bibliotecario');
         
@@ -197,11 +175,9 @@ class LibroTest extends TestCase
             'total_copies' => 5,
         ];
 
-        // Ejecucion
         $response = $this->actingAs($user)
             ->postJson('/api/v1/books', $bookData);
 
-        // Verificacion
         $response->assertStatus(201);
         $response->assertJsonStructure([
             'id',
@@ -224,7 +200,6 @@ class LibroTest extends TestCase
 
     public function test_it_stores_title_correctly()
     {
-        // Preparacion
         $user = User::factory()->create();
         $user->assignRole('bibliotecario');
         
@@ -235,11 +210,9 @@ class LibroTest extends TestCase
             'total_copies' => 3,
         ];
 
-        // Ejecucion
         $response = $this->actingAs($user)
             ->postJson('/api/v1/books', $bookData);
 
-        // Verificacion
         $this->assertDatabaseHas('books', [
             'title' => 'El Principito',
         ]);
@@ -247,7 +220,6 @@ class LibroTest extends TestCase
 
     public function test_it_stores_description_correctly()
     {
-        // Preparacion
         $user = User::factory()->create();
         $user->assignRole('bibliotecario');
         
@@ -258,11 +230,9 @@ class LibroTest extends TestCase
             'total_copies' => 2,
         ];
 
-        // Ejecucion
         $response = $this->actingAs($user)
             ->postJson('/api/v1/books', $bookData);
 
-        // Verificacion
         $this->assertDatabaseHas('books', [
             'description' => 'Clásico de la literatura española',
         ]);
@@ -270,7 +240,6 @@ class LibroTest extends TestCase
 
     public function test_it_stores_ISBN_correctly()
     {
-        // Preparacion
         $user = User::factory()->create();
         $user->assignRole('bibliotecario');
         
@@ -281,11 +250,9 @@ class LibroTest extends TestCase
             'total_copies' => 4,
         ];
 
-        // Ejecucion
         $response = $this->actingAs($user)
             ->postJson('/api/v1/books', $bookData);
 
-        // Verificacion
         $this->assertDatabaseHas('books', [
             'ISBN' => '9780451524935',
         ]);
@@ -293,7 +260,6 @@ class LibroTest extends TestCase
 
     public function test_it_stores_total_copies_correctly()
     {
-        // Preparacion
         $user = User::factory()->create();
         $user->assignRole('bibliotecario');
         
@@ -304,11 +270,9 @@ class LibroTest extends TestCase
             'total_copies' => 10,
         ];
 
-        // Ejecucion
         $response = $this->actingAs($user)
             ->postJson('/api/v1/books', $bookData);
 
-        // Verificacion
         $this->assertDatabaseHas('books', [
             'total_copies' => 10,
         ]);
@@ -316,7 +280,6 @@ class LibroTest extends TestCase
 
     public function test_it_initializes_available_copies_equal_to_total_copies()
     {
-        // Preparacion
         $user = User::factory()->create();
         $user->assignRole('bibliotecario');
         
@@ -327,11 +290,9 @@ class LibroTest extends TestCase
             'total_copies' => 7,
         ];
 
-        // Ejecucion
         $response = $this->actingAs($user)
             ->postJson('/api/v1/books', $bookData);
 
-        // Verificacion
         $this->assertDatabaseHas('books', [
             'total_copies' => 7,
             'available_copies' => 7,
@@ -340,7 +301,6 @@ class LibroTest extends TestCase
 
     public function test_it_sets_is_available_true_by_default()
     {
-        // Preparacion
         $user = User::factory()->create();
         $user->assignRole('bibliotecario');
         
@@ -351,11 +311,9 @@ class LibroTest extends TestCase
             'total_copies' => 3,
         ];
 
-        // Ejecucion
         $response = $this->actingAs($user)
             ->postJson('/api/v1/books', $bookData);
 
-        // Verificacion
         $this->assertDatabaseHas('books', [
             'is_available' => true,
         ]);
@@ -363,7 +321,6 @@ class LibroTest extends TestCase
 
     public function test_it_returns_201_on_success()
     {
-        // Preparacion
         $user = User::factory()->create();
         $user->assignRole('bibliotecario');
         
@@ -374,17 +331,14 @@ class LibroTest extends TestCase
             'total_copies' => 6,
         ];
 
-        // Ejecucion
         $response = $this->actingAs($user)
             ->postJson('/api/v1/books', $bookData);
 
-        // Verificacion
         $response->assertStatus(201);
     }
 
     public function test_it_validates_title_is_required()
     {
-        // Preparacion
         $user = User::factory()->create();
         $user->assignRole('bibliotecario');
         
@@ -393,18 +347,15 @@ class LibroTest extends TestCase
             'total_copies' => 5,
         ];
 
-        // Ejecucion
         $response = $this->actingAs($user)
             ->postJson('/api/v1/books', $bookData);
 
-        // Verificacion
         $response->assertStatus(422);
         $response->assertJsonValidationErrors('title');
     }
 
     public function test_it_validates_ISBN_is_required()
     {
-        // Preparacion
         $user = User::factory()->create();
         $user->assignRole('bibliotecario');
         
@@ -413,18 +364,15 @@ class LibroTest extends TestCase
             'total_copies' => 5,
         ];
 
-        // Ejecucion
         $response = $this->actingAs($user)
             ->postJson('/api/v1/books', $bookData);
 
-        // Verificacion
         $response->assertStatus(422);
         $response->assertJsonValidationErrors('ISBN');
     }
 
     public function test_it_validates_total_copies_is_required()
     {
-        // Preparacion
         $user = User::factory()->create();
         $user->assignRole('bibliotecario');
         
@@ -433,18 +381,15 @@ class LibroTest extends TestCase
             'ISBN' => '9780747532744',
         ];
 
-        // Ejecucion
         $response = $this->actingAs($user)
             ->postJson('/api/v1/books', $bookData);
 
-        // Verificacion
         $response->assertStatus(422);
         $response->assertJsonValidationErrors('total_copies');
     }
 
     public function test_it_validates_ISBN_is_unique()
     {
-        // Preparacion
         $user = User::factory()->create();
         $user->assignRole('bibliotecario');
         
@@ -458,18 +403,15 @@ class LibroTest extends TestCase
             'total_copies' => 3,
         ];
 
-        // Ejecucion
         $response = $this->actingAs($user)
             ->postJson('/api/v1/books', $bookData);
 
-        // Verificacion
         $response->assertStatus(422);
         $response->assertJsonValidationErrors('ISBN');
     }
 
     public function test_it_validates_total_copies_is_integer()
     {
-        // Preparacion
         $user = User::factory()->create();
         $user->assignRole('bibliotecario');
         
@@ -479,18 +421,15 @@ class LibroTest extends TestCase
             'total_copies' => 'no-es-numero',
         ];
 
-        // Ejecucion
         $response = $this->actingAs($user)
             ->postJson('/api/v1/books', $bookData);
 
-        // Verificacion
         $response->assertStatus(422);
         $response->assertJsonValidationErrors('total_copies');
     }
 
     public function test_it_validates_title_is_not_empty_string()
     {
-        // Preparacion
         $user = User::factory()->create();
         $user->assignRole('bibliotecario');
         
@@ -500,18 +439,15 @@ class LibroTest extends TestCase
             'total_copies' => 5,
         ];
 
-        // Ejecucion
         $response = $this->actingAs($user)
             ->postJson('/api/v1/books', $bookData);
 
-        // Verificacion
         $response->assertStatus(422);
         $response->assertJsonValidationErrors('title');
     }
 
     public function test_it_validates_total_copies_is_positive()
     {
-        // Preparacion
         $user = User::factory()->create();
         $user->assignRole('bibliotecario');
         
@@ -521,12 +457,350 @@ class LibroTest extends TestCase
             'total_copies' => 0,
         ];
 
-        // Ejecucion
         $response = $this->actingAs($user)
             ->postJson('/api/v1/books', $bookData);
 
-        // Verificacion
         $response->assertStatus(422);
         $response->assertJsonValidationErrors('total_copies');
+    }
+
+    // ============================================================================
+    // PRUEBAS DE ACTUALIZACIÓN DE LIBRO (PUT /api/v1/books/{book})
+    // ============================================================================
+
+    public function test_usuario_no_autenticado_no_puede_actualizar_libro()
+    {
+        $libro = Book::factory()->create();
+        
+        $datosActualizados = [
+            'title' => 'Nuevo titulo',
+            'description' => 'Nueva descripción',
+            'ISBN' => $libro->ISBN,
+            'total_copies' => 10,
+            'available_copies' => 5,
+            'is_available' => true,
+        ];
+        
+        $response = $this->putJson("/api/v1/books/{$libro->id}", $datosActualizados);
+        
+        $response->assertStatus(401);
+    }
+
+    public function test_usuario_sin_rol_bibliotecario_no_puede_actualizar_libro()
+    {
+        $usuario = User::factory()->create();
+        $libro = Book::factory()->create();
+        
+        $datosActualizados = [
+            'title' => 'Nuevo titulo',
+            'description' => 'Nueva descripción',
+            'ISBN' => $libro->ISBN,
+            'total_copies' => 10,
+            'available_copies' => 5,
+            'is_available' => true,
+        ];
+        $response = $this->actingAs($usuario, 'sanctum')
+                         ->putJson("/api/v1/books/{$libro->id}", $datosActualizados);
+        
+        $response->assertStatus(403);
+    }
+
+    public function test_bibliotecario_puede_actualizar_un_libro()
+    {
+        $bibliotecario = User::factory()->create();
+        $bibliotecario->assignRole('bibliotecario');
+        
+        $libro = Book::factory()->create([
+            'title' => 'Título Original',
+            'ISBN' => '1234567890',
+        ]);
+        
+        $datosActualizados = [
+            'title' => 'Título Actualizado',
+            'description' => 'Descripción actualizada',
+            'ISBN' => '0987654321',
+            'total_copies' => 15,
+            'available_copies' => 10,
+            'is_available' => true,
+        ];
+        
+        // Ejecucion
+        $response = $this->actingAs($bibliotecario, 'sanctum')
+                         ->putJson("/api/v1/books/{$libro->id}", $datosActualizados);
+        
+        // Verificacion
+        $response->assertStatus(200);
+        $response->assertJsonFragment(['message' => 'el libro fue actualizado exitosamente']);
+        
+        $this->assertDatabaseHas('books', [
+            'id' => $libro->id,
+            'title' => 'Título Actualizado',
+            'ISBN' => '0987654321',
+            'total_copies' => 15,
+            'available_copies' => 10,
+        ]);
+    }
+
+    public function test_falla_al_actualizar_libro_sin_titulo_requerido()
+    {
+        // Preparacion
+        $bibliotecario = User::factory()->create();
+        $bibliotecario->assignRole('bibliotecario');
+        
+        $libro = Book::factory()->create();
+        
+        $datosInvalidos = [
+            'description' => 'Descripción',
+            'ISBN' => $libro->ISBN,
+            'total_copies' => 10,
+            'available_copies' => 5,
+            'is_available' => true,
+        ];
+        
+        // Ejecucion
+        $response = $this->actingAs($bibliotecario, 'sanctum')
+                         ->putJson("/api/v1/books/{$libro->id}", $datosInvalidos);
+        
+        // Verificacion
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['title']);
+    }
+
+    public function test_falla_al_actualizar_libro_sin_ISBN_requerido()
+    {
+        $bibliotecario = User::factory()->create();
+        $bibliotecario->assignRole('bibliotecario');
+        
+        $libro = Book::factory()->create();
+        
+        $datosInvalidos = [
+            'title' => 'Título válido',
+            'description' => 'Descripción',
+            'total_copies' => 10,
+            'available_copies' => 5,
+            'is_available' => true,
+        ];
+        
+        $response = $this->actingAs($bibliotecario, 'sanctum')
+                         ->putJson("/api/v1/books/{$libro->id}", $datosInvalidos);
+        
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['ISBN']);
+    }
+
+    public function test_falla_al_actualizar_con_ISBN_duplicado()
+    {
+        $bibliotecario = User::factory()->create();
+        $bibliotecario->assignRole('bibliotecario');
+        
+        $libroExistente = Book::factory()->create(['ISBN' => '1111111111']);
+        $libroActualizar = Book::factory()->create(['ISBN' => '2222222222']);
+        
+        $datosInvalidos = [
+            'title' => 'Título válido',
+            'description' => 'Descripción',
+            'ISBN' => '1111111111',
+            'total_copies' => 10,
+            'available_copies' => 5,
+            'is_available' => true,
+        ];
+        
+        $response = $this->actingAs($bibliotecario, 'sanctum')
+                         ->putJson("/api/v1/books/{$libroActualizar->id}", $datosInvalidos);
+        
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['ISBN']);
+    }
+
+    public function test_falla_cuando_available_copies_es_mayor_que_total_copies()
+    {
+        $bibliotecario = User::factory()->create();
+        $bibliotecario->assignRole('bibliotecario');
+        
+        $libro = Book::factory()->create();
+        
+        $datosInvalidos = [
+            'title' => 'Título válido',
+            'description' => 'Descripción',
+            'ISBN' => $libro->ISBN,
+            'total_copies' => 5,
+            'available_copies' => 10,
+            'is_available' => true,
+        ];
+        
+        $response = $this->actingAs($bibliotecario, 'sanctum')
+                         ->putJson("/api/v1/books/{$libro->id}", $datosInvalidos);
+        
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['available_copies']);
+    }
+
+    public function test_falla_al_actualizar_con_total_copies_cero_o_negativo()
+    {
+        $bibliotecario = User::factory()->create();
+        $bibliotecario->assignRole('bibliotecario');
+        
+        $libro = Book::factory()->create();
+        
+        $datosInvalidos = [
+            'title' => 'Título válido',
+            'description' => 'Descripción',
+            'ISBN' => $libro->ISBN,
+            'total_copies' => 0,
+            'available_copies' => 0,
+            'is_available' => true,
+        ];
+        
+        $response = $this->actingAs($bibliotecario, 'sanctum')
+                         ->putJson("/api/v1/books/{$libro->id}", $datosInvalidos);
+        
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['total_copies']);
+    }
+
+    public function test_falla_al_actualizar_con_available_copies_negativo()
+    {
+        $bibliotecario = User::factory()->create();
+        $bibliotecario->assignRole('bibliotecario');
+        
+        $libro = Book::factory()->create();
+        
+        $datosInvalidos = [
+            'title' => 'Título válido',
+            'description' => 'Descripción',
+            'ISBN' => $libro->ISBN,
+            'total_copies' => 10,
+            'available_copies' => -1,
+            'is_available' => true,
+        ];
+        
+        $response = $this->actingAs($bibliotecario, 'sanctum')
+                         ->putJson("/api/v1/books/{$libro->id}", $datosInvalidos);
+        
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['available_copies']);
+    }
+
+    public function test_actualiza_correctamente_todos_los_campos_del_libro()
+    {
+        $bibliotecario = User::factory()->create();
+        $bibliotecario->assignRole('bibliotecario');
+        
+        $libro = Book::factory()->create([
+            'title' => 'Título Viejo',
+            'description' => 'Descripción vieja',
+            'ISBN' => '1111111111',
+            'total_copies' => 5,
+            'available_copies' => 2,
+            'is_available' => false,
+        ]);
+        
+        $datosActualizados = [
+            'title' => 'Título nuevo',
+            'description' => 'Descripción nueva y detallada',
+            'ISBN' => '9999999999',
+            'total_copies' => 25,
+            'available_copies' => 20,
+            'is_available' => true,
+        ];
+        
+        $response = $this->actingAs($bibliotecario, 'sanctum')
+                         ->putJson("/api/v1/books/{$libro->id}", $datosActualizados);
+        
+        $response->assertStatus(200);
+        
+        $libroActualizado = $libro->fresh();
+        $this->assertEquals('Título nuevo', $libroActualizado->title);
+        $this->assertEquals('Descripción nueva y detallada', $libroActualizado->description);
+        $this->assertEquals('9999999999', $libroActualizado->ISBN);
+        $this->assertEquals(25, $libroActualizado->total_copies);
+        $this->assertEquals(20, $libroActualizado->available_copies);
+        $this->assertTrue($libroActualizado->is_available);
+    }
+
+    public function test_puede_actualizar_libro_manteniendo_el_mismo_ISBN()
+    {
+        $bibliotecario = User::factory()->create();
+        $bibliotecario->assignRole('bibliotecario');
+        
+        $libro = Book::factory()->create(['ISBN' => '5555555555']);
+        
+        $datosActualizados = [
+            'title' => 'Nuevo Título',
+            'description' => 'Nueva descripción',
+            'ISBN' => '5555555555',
+            'total_copies' => 20,
+            'available_copies' => 15,
+            'is_available' => true,
+        ];
+        
+        $response = $this->actingAs($bibliotecario, 'sanctum')
+                         ->putJson("/api/v1/books/{$libro->id}", $datosActualizados);
+        
+        $response->assertStatus(200);
+        
+        $this->assertDatabaseHas('books', [
+            'id' => $libro->id,
+            'ISBN' => '5555555555',
+            'title' => 'Nuevo Título',
+        ]);
+    }
+
+    public function test_puede_actualizar_solo_el_titulo_y_descripcion()
+    {
+        $bibliotecario = User::factory()->create();
+        $bibliotecario->assignRole('bibliotecario');
+        
+        $libro = Book::factory()->create([
+            'title' => 'Título original',
+            'description' => 'Descripción original',
+            'ISBN' => '7777777777',
+            'total_copies' => 10,
+            'available_copies' => 5,
+            'is_available' => true,
+        ]);
+        
+        $datosActualizados = [
+            'title' => 'Solo título actualizado',
+            'description' => 'Solo descripción actualizada',
+            'ISBN' => $libro->ISBN,
+            'total_copies' => $libro->total_copies,
+            'available_copies' => $libro->available_copies,
+            'is_available' => $libro->is_available,
+        ];
+        
+        $response = $this->actingAs($bibliotecario, 'sanctum')
+                         ->putJson("/api/v1/books/{$libro->id}", $datosActualizados);
+        
+        $response->assertStatus(200);
+        
+        $libroActualizado = $libro->fresh();
+        $this->assertEquals('Solo título actualizado', $libroActualizado->title);
+        $this->assertEquals('Solo descripción actualizada', $libroActualizado->description);
+        $this->assertEquals('7777777777', $libroActualizado->ISBN);
+        $this->assertEquals(10, $libroActualizado->total_copies);
+        $this->assertEquals(5, $libroActualizado->available_copies);
+    }
+
+    public function test_falla_al_actualizar_libro_que_no_existe()
+    {
+        $bibliotecario = User::factory()->create();
+        $bibliotecario->assignRole('bibliotecario');
+        
+        $idLibroInexistente = 99999;
+        
+        $datosActualizados = [
+            'title' => 'Título',
+            'description' => 'Descripción',
+            'ISBN' => '1234567890',
+            'total_copies' => 10,
+            'available_copies' => 5,
+            'is_available' => true,
+        ];
+        
+        $response = $this->actingAs($bibliotecario, 'sanctum')
+                         ->putJson("/api/v1/books/{$idLibroInexistente}", $datosActualizados);
+        
+        $response->assertStatus(404);
     }
 }
