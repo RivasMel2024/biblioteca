@@ -171,10 +171,12 @@ class LibroTest extends TestCase
         $this->app->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 
         Role::create(['name' => 'bibliotecario']);
+        Role::create(['name' => 'estudiante']);
+        Role::create(['name' => 'docente']);
     }
 
     /** 1 y 2. Librarian deletes book & database confirmation */
-    public function test_librarian_can_delete_book_without_active_loans()
+    public function test_bibliotecario_puede_eliminar_libro_sin_prestamos_activos()
     {
         $librarian = User::factory()->create();
         $librarian->assignRole('bibliotecario');
@@ -188,7 +190,7 @@ class LibroTest extends TestCase
     }
 
     /** 3 y 4. Blocked deletion with active loans & database persistence */
-    public function test_librarian_cannot_delete_book_with_active_loans()
+    public function test_bibliotecario_no_puede_eliminar_libro_con_prestamos_activos()
     {
         $librarian = User::factory()->create();
         $librarian->assignRole('bibliotecario');
@@ -209,7 +211,7 @@ class LibroTest extends TestCase
     }
 
     /** 5. Non-librarian user cannot delete */
-    public function test_non_librarian_user_cannot_delete_book()
+    public function test_usuario_no_bibliotecario_no_puede_eliminar_libro()
     {
         $user = User::factory()->create(); 
 
@@ -222,7 +224,7 @@ class LibroTest extends TestCase
     }
 
     /** 6. Unauthenticated user cannot delete */
-    public function test_unauthenticated_user_cannot_delete_book()
+    public function test_usuario_no_autenticado_no_puede_eliminar_libro()
     {
         $book = Book::factory()->create();
 
@@ -232,7 +234,7 @@ class LibroTest extends TestCase
     }
 
     /** 7. Returns 500 when exception occurs (Mocking) */
-    public function test_delete_returns_500_when_exception_occurs()
+    public function test_eliminar_retorna_500_cuando_ocurre_una_excepcion()
     {
         $librarian = User::factory()->create();
         $librarian->assignRole('bibliotecario');
@@ -246,5 +248,77 @@ class LibroTest extends TestCase
             ->deleteJson("/api/v1/books/{$book->id}");
         
         $this->assertTrue(true); 
+    }
+
+    
+    /** PRUEBAS DE LOANS */
+    public function test_estudiante_puede_crear_prestamo_y_actualiza_stock()
+    {
+        $user = User::factory()->create();
+        $user->assignRole('estudiante');
+        $book = Book::factory()->create(['available_copies' => 5, 'is_available' => true]);
+
+        $response = $this->actingAs($user)
+            ->postJson('/api/v1/loans', [
+                'book_id' => $book->id,
+                'requester_name' => $user->name
+            ]);
+
+        $response->assertStatus(201);
+        $this->assertDatabaseHas('books', [
+            'id' => $book->id,
+            'available_copies' => 4
+        ]);
+    }
+
+    public function test_prestamo_falla_si_el_libro_no_tiene_copias_disponibles()
+    {
+        $user = User::factory()->create();
+        $user->assignRole('docente');
+        $book = Book::factory()->create(['available_copies' => 0, 'is_available' => false]);
+
+        $response = $this->actingAs($user)
+            ->postJson('/api/v1/loans', [
+                'book_id' => $book->id,
+                'requester_name' => $user->name
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJson(['message' => 'Book is not available']);
+    }
+
+    public function test_bibliotecario_no_puede_crear_prestamo_segun_policy()
+    {
+        $librarian = User::factory()->create();
+        $librarian->assignRole('bibliotecario');
+        $book = Book::factory()->create();
+
+        $response = $this->actingAs($librarian)
+            ->postJson('/api/v1/loans', [
+                'book_id' => $book->id,
+                'requester_name' => 'Admin'
+            ]);
+
+        $response->assertStatus(403);
+    }
+
+    public function test_usuario_puede_devolver_libro_y_restaurar_stock()
+    {
+        $user = User::factory()->create();
+        $user->assignRole('estudiante');
+        
+        $book = Book::factory()->create(['available_copies' => 0, 'is_available' => false]);
+        $loan = Loan::factory()->create(['book_id' => $book->id, 'return_at' => null]);
+
+        $response = $this->actingAs($user)
+            ->postJson("/api/v1/loans/{$loan->id}/return");
+
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('books', [
+            'id' => $book->id, 
+            'available_copies' => 1, 
+            'is_available' => true
+        ]);
+        $this->assertNotNull($loan->fresh()->return_at);
     }
 }
