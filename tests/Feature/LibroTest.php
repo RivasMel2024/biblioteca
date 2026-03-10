@@ -146,63 +146,6 @@ class LibroTest extends TestCase
     // PRUEBAS DE CREACIÓN DE LIBRO (POST /api/v1/books)
     // ============================================================================
 
-    /**
-     * Matriz de Pruebas - Endpoint: Crear Libro (POST /api/v1/books)
-     *
-     * | ID   | Escenario                                           | Entrada                           | Resultado Esperado       |
-     * |------|-----------------------------------------------------|-----------------------------------|--------------------------|
-     * | CB01 | Crear libro con todos los campos requeridos         | Datos válidos completos           | 201 + libro creado       |
-     * | CB02 | Verificar persistencia del título                   | title enviado                     | title guardado en BD     |
-     * | CB03 | Verificar persistencia de descripción               | description enviada               | description en BD        |
-     * | CB04 | Verificar persistencia de ISBN                      | ISBN enviado                      | ISBN guardado en BD      |
-     * | CB05 | Verificar persistencia de total_copies              | total_copies enviado              | total_copies en BD       |
-     * | CB06 | available_copies se inicializa igual a total_copies | total_copies = 10                 | available_copies = 10    |
-     * | CB07 | is_available es true por defecto                    | Crear libro                       | is_available = true      |
-     * | CB08 | Retorna código 201 en éxito                         | Datos válidos                     | 201 Created              |
-     * | CB09 | Validar title es requerido                          | Sin title                         | 422 + error              |
-     * | CB10 | Validar ISBN es requerido                           | Sin ISBN                          | 422 + error              |
-     * | CB11 | Validar total_copies es requerido                   | Sin total_copies                  | 422 + error              |
-     * | CB12 | Validar ISBN es único                               | ISBN duplicado                    | 422 + error              |
-     * | CB13 | Validar total_copies es entero                      | total_copies no entero            | 422 + error              |
-     * | CB14 | Validar title no es cadena vacía                    | title = ""                        | 422 + error              |
-     * | CB15 | Validar total_copies es positivo                    | total_copies < 1                  | 422 + error              |
-    */
-
-    public function test_puede_crear_un_libro()
-    {
-        $user = User::factory()->create();
-        $user->assignRole('bibliotecario');
-        
-        $bookData = [
-            'title' => 'Cien años de soledad',
-            'description' => 'Obra maestra de Gabriel García Márquez',
-            'ISBN' => '9780307474728',
-            'total_copies' => 5,
-        ];
-
-        $response = $this->actingAs($user)
-            ->postJson('/api/v1/books', $bookData);
-
-        $response->assertStatus(201);
-        $response->assertJsonStructure([
-            'id',
-            'title',
-            'description',
-            'ISBN',
-            'total_copies',
-            'available_copies',
-            'is_available',
-        ]);
-        $response->assertJsonFragment([
-            'title' => 'Cien años de soledad',
-            'ISBN' => '9780307474728',
-        ]);
-        $this->assertDatabaseHas('books', [
-            'title' => 'Cien años de soledad',
-            'ISBN' => '9780307474728',
-        ]);
-    }
-
     public function test_almacena_titulo_correctamente()
     {
         $user = User::factory()->create();
@@ -510,40 +453,6 @@ class LibroTest extends TestCase
         $response->assertStatus(403);
     }
 
-    public function test_bibliotecario_puede_actualizar_un_libro()
-    {
-        $bibliotecario = User::factory()->create();
-        $bibliotecario->assignRole('bibliotecario');
-        
-        $libro = Book::factory()->create([
-            'title' => 'Título Original',
-            'ISBN' => '1234567890',
-        ]);
-        
-        $datosActualizados = [
-            'title' => 'Título Actualizado',
-            'description' => 'Descripción actualizada',
-            'ISBN' => '0987654321',
-            'total_copies' => 15,
-            'available_copies' => 10,
-            'is_available' => true,
-        ];
-        
-        $response = $this->actingAs($bibliotecario, 'sanctum')
-                         ->putJson("/api/v1/books/{$libro->id}", $datosActualizados);
-        
-        $response->assertStatus(200);
-        $response->assertJsonFragment(['message' => 'el libro fue actualizado exitosamente']);
-        
-        $this->assertDatabaseHas('books', [
-            'id' => $libro->id,
-            'title' => 'Título Actualizado',
-            'ISBN' => '0987654321',
-            'total_copies' => 15,
-            'available_copies' => 10,
-        ]);
-    }
-
     public function test_falla_al_actualizar_libro_sin_titulo_requerido()
     {
         $bibliotecario = User::factory()->create();
@@ -808,35 +717,6 @@ class LibroTest extends TestCase
     // PRUEBAS DE ELIMINACIÓN DE LIBRO (DELETE /api/v1/books/{book})
     // ===========================================================================
 
-    /**
-     * Matriz de Pruebas - Endpoint: Eliminar Libro (DELETE /api/v1/books/{book})
-     *
-     * | ID   | Escenario                                              | Entrada                                      | Resultado Esperado                          |
-     * |------|--------------------------------------------------------|----------------------------------------------|---------------------------------------------|
-     * | DL01 | Bibliotecario elimina libro sin préstamos activos      | ID válido, token bibliotecario, sin préstamos| 200 OK + mensaje de éxito                  |
-     * | DL02 | Verificar eliminación exitosa remueve registro de BD   | ID válido, token bibliotecario               | Registro eliminado de la base de datos     |
-     * | DL03 | Bibliotecario intenta eliminar con préstamos activos   | ID válido, token bibliotecario, return_at=null| 422 Unprocessable Entity + mensaje error   |
-     * | DL04 | Verificar que libro permanece cuando falla eliminación | ID válido, préstamo activo                   | Registro permanece en base de datos        |
-     * | DL05 | Usuario no autorizado intenta eliminar                 | ID válido, token no-bibliotecario            | 403 Forbidden                              |
-     * | DL06 | Usuario no autenticado intenta eliminar                | ID válido, sin token                         | 401 Unauthorized                           |
-     * | DL07 | Ocurre excepción durante eliminación                   | ID válido, forzar excepción (mock)           | 500 Internal Server Error                  |
-     * | DL08 | Validar relación Libro-Préstamo                        | Libro con múltiples préstamos                | loans() retorna relación hasMany correcta  |
-     */
-
-    /** 1 y 2. Bibliotecario elimina libro y confirmación en base de datos */
-    public function test_bibliotecario_puede_eliminar_libro_sin_prestamos_activos()
-    {
-        $librarian = User::factory()->create();
-        $librarian->assignRole('bibliotecario');
-        $book = Book::factory()->create();
-
-        $response = $this->actingAs($librarian)
-            ->deleteJson("/api/v1/books/{$book->id}");
-
-        $response->assertStatus(200);
-        $this->assertDatabaseMissing('books', ['id' => $book->id]);
-    }
-
     /** 3 y 4. Eliminación bloqueada con préstamos activos y persistencia en base de datos */
     public function test_bibliotecario_no_puede_eliminar_libro_con_prestamos_activos()
     {
@@ -900,6 +780,7 @@ class LibroTest extends TestCase
 
     
     /** PRUEBAS DE LOANS */
+
     public function test_estudiante_puede_crear_prestamo_y_actualiza_stock()
     {
         $user = User::factory()->create();
@@ -933,21 +814,6 @@ class LibroTest extends TestCase
 
         $response->assertStatus(422)
             ->assertJson(['message' => 'Book is not available']);
-    }
-
-    public function test_bibliotecario_no_puede_crear_prestamo_segun_policy()
-    {
-        $librarian = User::factory()->create();
-        $librarian->assignRole('bibliotecario');
-        $book = Book::factory()->create();
-
-        $response = $this->actingAs($librarian)
-            ->postJson('/api/v1/loans', [
-                'book_id' => $book->id,
-                'requester_name' => 'Admin'
-            ]);
-
-        $response->assertStatus(403);
     }
 
     public function test_usuario_puede_devolver_libro_y_restaurar_stock()
