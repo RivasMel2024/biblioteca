@@ -20,6 +20,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     Route::put('books/{book}', [BookController::class, 'update']); // actualizar libro
     Route::get('books/{book}', [BookController::class, 'show']); // detalle libro
     
+    // Loans
     Route::get('loans', [LoanController::class, 'index']);
     Route::post('loans', [LoanController::class, 'store']);
     Route::post('loans/{loan}/return', ReturnLoanController::class);

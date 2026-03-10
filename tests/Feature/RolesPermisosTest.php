@@ -282,6 +282,8 @@ class RolesPermisosTest extends TestCase
         $this->assertDatabaseHas('loans', ['book_id' => $book->id]);
     }
 
+
+    // Historial
     public function test_docente_puede_ver_prestamos()
     {
         $docente = User::factory()->create();
