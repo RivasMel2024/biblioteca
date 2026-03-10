@@ -33,4 +33,35 @@ class AuthTest extends TestCase
 
         $this->assertAuthenticatedAs($user);
     }
+
+    public function test_it_can_logout()
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token')->plainTextToken;
+
+        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+            ->post('/api/v1/logout');
+
+        $response->assertStatus(200);
+        $response->assertJson(['message' => 'Logged out successfully']);
+        
+        // Verificar que los tokens fueron eliminados
+        $this->assertEquals(0, $user->tokens()->count());
+    }
+
+    public function test_it_can_see_user_profile()
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get('/api/v1/profile');
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+            ]
+        ]);
+    }
 }
