@@ -168,7 +168,7 @@ class LibroTest extends TestCase
      * | CB15 | Validar total_copies es positivo                    | total_copies < 1                  | 422 + error              |
     */
 
-    public function test_it_can_create_a_book()
+    public function test_puede_crear_un_libro()
     {
         $user = User::factory()->create();
         $user->assignRole('bibliotecario');
@@ -203,7 +203,7 @@ class LibroTest extends TestCase
         ]);
     }
 
-    public function test_it_stores_title_correctly()
+    public function test_almacena_titulo_correctamente()
     {
         $user = User::factory()->create();
         $user->assignRole('bibliotecario');
@@ -223,7 +223,7 @@ class LibroTest extends TestCase
         ]);
     }
 
-    public function test_it_stores_description_correctly()
+    public function test_almacena_descripcion_correctamente()
     {
         $user = User::factory()->create();
         $user->assignRole('bibliotecario');
@@ -243,7 +243,7 @@ class LibroTest extends TestCase
         ]);
     }
 
-    public function test_it_stores_ISBN_correctly()
+    public function test_almacena_ISBN_correctamente()
     {
         $user = User::factory()->create();
         $user->assignRole('bibliotecario');
@@ -263,7 +263,7 @@ class LibroTest extends TestCase
         ]);
     }
 
-    public function test_it_stores_total_copies_correctly()
+    public function test_almacena_total_copies_correctamente()
     {
         $user = User::factory()->create();
         $user->assignRole('bibliotecario');
@@ -283,7 +283,7 @@ class LibroTest extends TestCase
         ]);
     }
 
-    public function test_it_initializes_available_copies_equal_to_total_copies()
+    public function test_inicializa_available_copies_igual_a_total_copies()
     {
         $user = User::factory()->create();
         $user->assignRole('bibliotecario');
@@ -304,7 +304,7 @@ class LibroTest extends TestCase
         ]);
     }
 
-    public function test_it_sets_is_available_true_by_default()
+    public function test_establece_is_available_verdadero_por_defecto()
     {
         $user = User::factory()->create();
         $user->assignRole('bibliotecario');
@@ -324,7 +324,7 @@ class LibroTest extends TestCase
         ]);
     }
 
-    public function test_it_returns_201_on_success()
+    public function test_retorna_201_en_exito()
     {
         $user = User::factory()->create();
         $user->assignRole('bibliotecario');
@@ -342,7 +342,7 @@ class LibroTest extends TestCase
         $response->assertStatus(201);
     }
 
-    public function test_it_validates_title_is_required()
+    public function test_valida_titulo_es_requerido()
     {
         $user = User::factory()->create();
         $user->assignRole('bibliotecario');
@@ -359,7 +359,7 @@ class LibroTest extends TestCase
         $response->assertJsonValidationErrors('title');
     }
 
-    public function test_it_validates_ISBN_is_required()
+    public function test_valida_ISBN_es_requerido()
     {
         $user = User::factory()->create();
         $user->assignRole('bibliotecario');
@@ -376,7 +376,7 @@ class LibroTest extends TestCase
         $response->assertJsonValidationErrors('ISBN');
     }
 
-    public function test_it_validates_total_copies_is_required()
+    public function test_valida_total_copies_es_requerido()
     {
         $user = User::factory()->create();
         $user->assignRole('bibliotecario');
@@ -393,7 +393,7 @@ class LibroTest extends TestCase
         $response->assertJsonValidationErrors('total_copies');
     }
 
-    public function test_it_validates_ISBN_is_unique()
+    public function test_valida_ISBN_es_unico()
     {
         $user = User::factory()->create();
         $user->assignRole('bibliotecario');
@@ -415,7 +415,7 @@ class LibroTest extends TestCase
         $response->assertJsonValidationErrors('ISBN');
     }
 
-    public function test_it_validates_total_copies_is_integer()
+    public function test_valida_total_copies_es_entero()
     {
         $user = User::factory()->create();
         $user->assignRole('bibliotecario');
@@ -433,7 +433,7 @@ class LibroTest extends TestCase
         $response->assertJsonValidationErrors('total_copies');
     }
 
-    public function test_it_validates_title_is_not_empty_string()
+    public function test_valida_titulo_no_sea_cadena_vacia()
     {
         $user = User::factory()->create();
         $user->assignRole('bibliotecario');
@@ -451,7 +451,7 @@ class LibroTest extends TestCase
         $response->assertJsonValidationErrors('title');
     }
 
-    public function test_it_validates_total_copies_is_positive()
+    public function test_valida_total_copies_es_positivo()
     {
         $user = User::factory()->create();
         $user->assignRole('bibliotecario');
@@ -529,11 +529,9 @@ class LibroTest extends TestCase
             'is_available' => true,
         ];
         
-        // Ejecucion
         $response = $this->actingAs($bibliotecario, 'sanctum')
                          ->putJson("/api/v1/books/{$libro->id}", $datosActualizados);
         
-        // Verificacion
         $response->assertStatus(200);
         $response->assertJsonFragment(['message' => 'el libro fue actualizado exitosamente']);
         
@@ -548,7 +546,6 @@ class LibroTest extends TestCase
 
     public function test_falla_al_actualizar_libro_sin_titulo_requerido()
     {
-        // Preparacion
         $bibliotecario = User::factory()->create();
         $bibliotecario->assignRole('bibliotecario');
         
@@ -562,11 +559,9 @@ class LibroTest extends TestCase
             'is_available' => true,
         ];
         
-        // Ejecucion
         $response = $this->actingAs($bibliotecario, 'sanctum')
                          ->putJson("/api/v1/books/{$libro->id}", $datosInvalidos);
         
-        // Verificacion
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['title']);
     }
@@ -818,18 +813,18 @@ class LibroTest extends TestCase
      *
      * | ID   | Escenario                                              | Entrada                                      | Resultado Esperado                          |
      * |------|--------------------------------------------------------|----------------------------------------------|---------------------------------------------|
-     * | DL01 | Librarian deletes book without active loans            | ID válido, token librarian, sin préstamos    | 200 OK + mensaje de éxito                  |
-     * | DL02 | Verify successful deletion removes record from DB      | ID válido, token librarian                   | Registro eliminado de la base de datos     |
-     * | DL03 | Librarian attempts delete with active loans            | ID válido, token librarian, return_at=null   | 422 Unprocessable Entity + mensaje error   |
-     * | DL04 | Verify book remains when deletion fails (active loan)  | ID válido, préstamo activo                   | Registro permanece en base de datos        |
-     * | DL05 | Unauthorized user attempts deletion                    | ID válido, token no-librarian                | 403 Forbidden                              |
-     * | DL06 | Unauthenticated user attempts deletion                 | ID válido, sin token                         | 401 Unauthorized                           |
-     * | DL07 | Exception occurs during deletion                       | ID válido, forzar excepción (mock)           | 500 Internal Server Error                  |
-     * | DL08 | Validate Book-Loan relationship                        | Libro con múltiples préstamos                | loans() retorna relación hasMany correcta  |
+     * | DL01 | Bibliotecario elimina libro sin préstamos activos      | ID válido, token bibliotecario, sin préstamos| 200 OK + mensaje de éxito                  |
+     * | DL02 | Verificar eliminación exitosa remueve registro de BD   | ID válido, token bibliotecario               | Registro eliminado de la base de datos     |
+     * | DL03 | Bibliotecario intenta eliminar con préstamos activos   | ID válido, token bibliotecario, return_at=null| 422 Unprocessable Entity + mensaje error   |
+     * | DL04 | Verificar que libro permanece cuando falla eliminación | ID válido, préstamo activo                   | Registro permanece en base de datos        |
+     * | DL05 | Usuario no autorizado intenta eliminar                 | ID válido, token no-bibliotecario            | 403 Forbidden                              |
+     * | DL06 | Usuario no autenticado intenta eliminar                | ID válido, sin token                         | 401 Unauthorized                           |
+     * | DL07 | Ocurre excepción durante eliminación                   | ID válido, forzar excepción (mock)           | 500 Internal Server Error                  |
+     * | DL08 | Validar relación Libro-Préstamo                        | Libro con múltiples préstamos                | loans() retorna relación hasMany correcta  |
      */
 
-    /** 1 y 2. Librarian deletes book & database confirmation */
-    public function test_librarian_can_delete_book_without_active_loans()
+    /** 1 y 2. Bibliotecario elimina libro y confirmación en base de datos */
+    public function test_bibliotecario_puede_eliminar_libro_sin_prestamos_activos()
     {
         $librarian = User::factory()->create();
         $librarian->assignRole('bibliotecario');
@@ -842,8 +837,8 @@ class LibroTest extends TestCase
         $this->assertDatabaseMissing('books', ['id' => $book->id]);
     }
 
-    /** 3 y 4. Blocked deletion with active loans & database persistence */
-    public function test_librarian_cannot_delete_book_with_active_loans()
+    /** 3 y 4. Eliminación bloqueada con préstamos activos y persistencia en base de datos */
+    public function test_bibliotecario_no_puede_eliminar_libro_con_prestamos_activos()
     {
         $librarian = User::factory()->create();
         $librarian->assignRole('bibliotecario');
@@ -863,8 +858,8 @@ class LibroTest extends TestCase
         $this->assertDatabaseHas('books', ['id' => $book->id]); 
     }
 
-    /** 5. Non-librarian user cannot delete */
-    public function test_non_librarian_user_cannot_delete_book()
+    /** 5. Usuario no bibliotecario no puede eliminar */
+    public function test_usuario_no_bibliotecario_no_puede_eliminar_libro()
     {
         $user = User::factory()->create(); 
 
@@ -876,8 +871,8 @@ class LibroTest extends TestCase
         $response->assertStatus(403);
     }
 
-    /** 6. Unauthenticated user cannot delete */
-    public function test_unauthenticated_user_cannot_delete_book()
+    /** 6. Usuario no autenticado no puede eliminar */
+    public function test_usuario_no_autenticado_no_puede_eliminar_libro()
     {
         $book = Book::factory()->create();
 
@@ -886,8 +881,8 @@ class LibroTest extends TestCase
         $response->assertStatus(401);
     }
 
-    /** 7. Returns 500 when exception occurs (Mocking) */
-    public function test_delete_returns_500_when_exception_occurs()
+    /** 7. Retorna 500 cuando ocurre una excepción (Mocking) */
+    public function test_eliminar_retorna_500_cuando_ocurre_una_excepcion()
     {
         $librarian = User::factory()->create();
         $librarian->assignRole('bibliotecario');
@@ -901,5 +896,77 @@ class LibroTest extends TestCase
             ->deleteJson("/api/v1/books/{$book->id}");
         
         $this->assertTrue(true); 
+    }
+
+    
+    /** PRUEBAS DE LOANS */
+    public function test_estudiante_puede_crear_prestamo_y_actualiza_stock()
+    {
+        $user = User::factory()->create();
+        $user->assignRole('estudiante');
+        $book = Book::factory()->create(['available_copies' => 5, 'is_available' => true]);
+
+        $response = $this->actingAs($user)
+            ->postJson('/api/v1/loans', [
+                'book_id' => $book->id,
+                'requester_name' => $user->name
+            ]);
+
+        $response->assertStatus(201);
+        $this->assertDatabaseHas('books', [
+            'id' => $book->id,
+            'available_copies' => 4
+        ]);
+    }
+
+    public function test_prestamo_falla_si_el_libro_no_tiene_copias_disponibles()
+    {
+        $user = User::factory()->create();
+        $user->assignRole('docente');
+        $book = Book::factory()->create(['available_copies' => 0, 'is_available' => false]);
+
+        $response = $this->actingAs($user)
+            ->postJson('/api/v1/loans', [
+                'book_id' => $book->id,
+                'requester_name' => $user->name
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJson(['message' => 'Book is not available']);
+    }
+
+    public function test_bibliotecario_no_puede_crear_prestamo_segun_policy()
+    {
+        $librarian = User::factory()->create();
+        $librarian->assignRole('bibliotecario');
+        $book = Book::factory()->create();
+
+        $response = $this->actingAs($librarian)
+            ->postJson('/api/v1/loans', [
+                'book_id' => $book->id,
+                'requester_name' => 'Admin'
+            ]);
+
+        $response->assertStatus(403);
+    }
+
+    public function test_usuario_puede_devolver_libro_y_restaurar_stock()
+    {
+        $user = User::factory()->create();
+        $user->assignRole('estudiante');
+        
+        $book = Book::factory()->create(['available_copies' => 0, 'is_available' => false]);
+        $loan = Loan::factory()->create(['book_id' => $book->id, 'return_at' => null]);
+
+        $response = $this->actingAs($user)
+            ->postJson("/api/v1/loans/{$loan->id}/return");
+
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('books', [
+            'id' => $book->id, 
+            'available_copies' => 1, 
+            'is_available' => true
+        ]);
+        $this->assertNotNull($loan->fresh()->return_at);
     }
 }
