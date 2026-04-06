@@ -1,0 +1,1275 @@
+{
+  "info": {
+    "name": "Biblioteca API - Test Suite",
+    "description": "Collection completa para probar la API de Biblioteca con todos los casos de uso",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{admin_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "AUTENTICACION",
+      "description": "Endpoints de autenticación - Login, Register, Logout",
+      "item": [
+        {
+          "name": "Register - Crear Usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.environment.set('user_token', pm.response.json().token);",
+                  "    console.log('Token guardado: ' + pm.response.json().token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nuevo Usuario\",\n  \"email\": \"nuevousuario@example.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/register",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "register"]
+            },
+            "description": "Registrar un nuevo usuario en el sistema"
+          }
+        },
+        {
+          "name": "Login - Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var token = pm.response.json().token;",
+                  "    pm.environment.set('admin_token', token);",
+                  "    console.log('Admin token guardado');",
+                  "}",
+                  "pm.test('Status code 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Response contiene token', function() {",
+                  "    pm.expect(pm.response.json()).to.have.property('token');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{admin_email}}\",\n  \"password\": \"{{admin_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/login",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "login"]
+            }
+          }
+        },
+        {
+          "name": "Login - Bibliotecario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    pm.environment.set('bibliotecario_token', pm.response.json().token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{bibliotecario_email}}\",\n  \"password\": \"{{bibliotecario_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/login",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "login"]
+            }
+          }
+        },
+        {
+          "name": "Login - Estudiante",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    pm.environment.set('estudiante_token', pm.response.json().token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{estudiante_email}}\",\n  \"password\": \"{{estudiante_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/login",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "login"]
+            }
+          }
+        },
+        {
+          "name": "Login - Docente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    pm.environment.set('docente_token', pm.response.json().token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{docente_email}}\",\n  \"password\": \"{{docente_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/login",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/profile",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/logout",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "USUARIOS",
+      "description": "Gestión de usuarios - Solo Admin",
+      "item": [
+        {
+          "name": "Listar Usuarios",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.json().data && pm.response.json().data.length > 0) {",
+                  "    pm.environment.set('user_id', pm.response.json().data[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/users",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "users"]
+            }
+          }
+        },
+        {
+          "name": "Ver Usuario por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/users/{{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "users", "{{user_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar Usuario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Usuario Actualizado\",\n  \"email\": \"usuarioactualizado@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/users/{{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "users", "{{user_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar Usuario",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/users/{{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "users", "{{user_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CATEGORIAS",
+      "description": "CRUD de Categorías de Libros",
+      "item": [
+        {
+          "name": "Listar Categorías",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.json().data && pm.response.json().data.length > 0) {",
+                  "    pm.environment.set('category_id', pm.response.json().data[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/categories",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "categories"]
+            },
+            "description": "Obtener lista de todas las categorías"
+          }
+        },
+        {
+          "name": "Crear Categoría",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.environment.set('category_id', pm.response.json().data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nueva Categoría\",\n  \"description\": \"Descripción de la categoría\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/categories",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "categories"]
+            }
+          }
+        },
+        {
+          "name": "Ver Categoría por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/categories/{{category_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "categories", "{{category_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar Categoría",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Categoría Actualizada\",\n  \"description\": \"Descripción actualizada\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/categories/{{category_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "categories", "{{category_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar Categoría",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/categories/{{category_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "categories", "{{category_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "LIBROS",
+      "description": "CRUD de Libros",
+      "item": [
+        {
+          "name": "Listar Libros",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.json().data && pm.response.json().data.length > 0) {",
+                  "    pm.environment.set('book_id', pm.response.json().data[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/books",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "books"]
+            },
+            "description": "Obtener lista de todos los libros"
+          }
+        },
+        {
+          "name": "Crear Libro",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.environment.set('book_id', pm.response.json().data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Nuevo Libro\",\n  \"description\": \"Descripción del libro\",\n  \"ISBN\": \"978-0-13-345897-6\",\n  \"category_id\": {{category_id}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/books",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "books"]
+            }
+          }
+        },
+        {
+          "name": "Ver Libro por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/books/{{book_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "books", "{{book_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar Libro",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Libro Actualizado\",\n  \"description\": \"Descripción actualizada\",\n  \"ISBN\": \"978-0-13-345897-7\",\n  \"category_id\": {{category_id}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/books/{{book_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "books", "{{book_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Obtener Copias de un Libro",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.json().data && pm.response.json().data.length > 0) {",
+                  "    pm.environment.set('book_copy_id', pm.response.json().data[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/books/{{book_id}}/copies",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "books", "{{book_id}}", "copies"]
+            },
+            "description": "Obtener todas las copias de un libro específico"
+          }
+        },
+        {
+          "name": "Eliminar Libro",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/books/{{book_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "books", "{{book_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "PRESTAMOS",
+      "description": "Gestión de préstamos de libros",
+      "item": [
+        {
+          "name": "Listar Préstamos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.json().data && pm.response.json().data.length > 0) {",
+                  "    pm.environment.set('loan_id', pm.response.json().data[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/loans",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "loans"]
+            },
+            "description": "Obtener lista de todos los préstamos"
+          }
+        },
+        {
+          "name": "Crear Préstamo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.environment.set('loan_id', pm.response.json().data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": {{user_id}},\n  \"book_copy_id\": {{book_copy_id}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/loans",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "loans"]
+            },
+            "description": "Crear un nuevo préstamo"
+          }
+        },
+        {
+          "name": "Ver Préstamo por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/loans/{{loan_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "loans", "{{loan_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Devolver Libro",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/loans/{{loan_id}}/return",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "loans", "{{loan_id}}", "return"]
+            },
+            "description": "Devolver un libro prestado"
+          }
+        }
+      ]
+    },
+    {
+      "name": "MULTAS",
+      "description": "Gestión de multas por atraso en devolución",
+      "item": [
+        {
+          "name": "Listar Multas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.json().data && pm.response.json().data.length > 0) {",
+                  "    pm.environment.set('fine_id', pm.response.json().data[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/fines",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "fines"]
+            },
+            "description": "Obtener lista de todas las multas"
+          }
+        },
+        {
+          "name": "Ver Multa por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/fines/{{fine_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "fines", "{{fine_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Pagar Multa",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/fines/{{fine_id}}/pay",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "fines", "{{fine_id}}", "pay"]
+            },
+            "description": "Pagar una multa pendiente"
+          }
+        }
+      ]
+    },
+    {
+      "name": "CASOS DE PRUEBA - FLUJOS COMPLETOS",
+      "description": "Flujos de prueba para validar la integración completa del sistema",
+      "item": [
+        {
+          "name": "FLUJO 1: Autenticación Completa",
+          "description": "Prueba login para todos los roles y obtención de tokens",
+          "item": [
+            {
+              "name": "Login Admin",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{admin_email}}\",\n  \"password\": \"{{admin_password}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/login",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "login"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "FLUJO 2: Crear Categoría y Libro",
+          "description": "Crear una categoría, luego crear un libro en esa categoría",
+          "item": [
+            {
+              "name": "Crear Categoría Literatura",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "    var data = pm.response.json();",
+                      "    pm.collectionVariables.set('new_category_id', data.data.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Literatura Clásica\",\n  \"description\": \"Obras clásicas de la literatura mundial\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/categories",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "categories"]
+                }
+              }
+            },
+            {
+              "name": "Crear Libro en Categoría",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Orgullo y Prejuicio\",\n  \"description\": \"Novela de Jane Austen publicada en 1813\",\n  \"ISBN\": \"978-0-14-143951-8\",\n  \"category_id\": \"{{new_category_id}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/books",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "books"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "FLUJO 3: Ciclo de Préstamo Completo",
+          "description": "Crear, consultar y devolver un préstamo",
+          "item": [
+            {
+              "name": "1. Generar Tokens Necesarios",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{estudiante_email}}\",\n  \"password\": \"{{estudiante_password}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/login",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "login"]
+                }
+              }
+            },
+            {
+              "name": "2. Consultar Libros Disponibles",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/v1/books",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "books"]
+                }
+              }
+            },
+            {
+              "name": "3. Obtener Copias Disponibles",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/v1/books/{{book_id}}/copies",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "books", "{{book_id}}", "copies"]
+                }
+              }
+            },
+            {
+              "name": "4. Crear Préstamo",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"user_id\": {{user_id}},\n  \"book_copy_id\": {{book_copy_id}}\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/loans",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "loans"]
+                }
+              }
+            },
+            {
+              "name": "5. Consultar Préstamo",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/v1/loans/{{loan_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "loans", "{{loan_id}}"]
+                }
+              }
+            },
+            {
+              "name": "6. Devolver Libro",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/loans/{{loan_id}}/return",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "loans", "{{loan_id}}", "return"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "FLUJO 4: Manejo de Multas",
+          "description": "Crear un préstamo atrasado y pagar la multa generada",
+          "item": [
+            {
+              "name": "1. Consultar Multas Pendientes",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/v1/fines",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "fines"]
+                }
+              }
+            },
+            {
+              "name": "2. Ver Detalles de Multa",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/v1/fines/{{fine_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "fines", "{{fine_id}}"]
+                }
+              }
+            },
+            {
+              "name": "3. Pagar Multa",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/fines/{{fine_id}}/pay",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "fines", "{{fine_id}}", "pay"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "FLUJO 5: Control de Permisos por Rol",
+          "description": "Verificar que cada rol tiene acceso solo a sus funcionalidades",
+          "item": [
+            {
+              "name": "Estudiante - Intentar crear categoría (debe fallar)",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{estudiante_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Test Categoría\",\n  \"description\": \"Test\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/categories",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "categories"]
+                }
+              }
+            },
+            {
+              "name": "Bibliotecario - Crear categoría (debe exitoso)",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{bibliotecario_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Categoría Bibliotecario\",\n  \"description\": \"Creada por bibliotecario\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/categories",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "categories"]
+                }
+              }
+            },
+            {
+              "name": "Estudiante - Listar préstamos (debe exitoso)",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{estudiante_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/v1/loans",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "loans"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "CASOS DE ERROR Y VALIDACION",
+      "description": "Pruebas de manejo de errores y validaciones",
+      "item": [
+        {
+          "name": "Sin Autenticación - Acceso denegado",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/books",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "books"]
+            }
+          }
+        },
+        {
+          "name": "Login - Email inválido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"novalido@example.com\",\n  \"password\": \"password\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/login",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "login"]
+            }
+          }
+        },
+        {
+          "name": "Login - Contraseña incorrecta",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{estudiante_email}}\",\n  \"password\": \"passwordincorrecto\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/login",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "login"]
+            }
+          }
+        },
+        {
+          "name": "Crear Categoría - Falta el nombre",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Sin nombre\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/categories",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "categories"]
+            }
+          }
+        },
+        {
+          "name": "Recurso no encontrado - ID inválido",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/books/99999",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "books", "99999"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://biblioteca.test/api"
+    },
+    {
+      "key": "new_category_id",
+      "value": ""
+    }
+  ]
+}
