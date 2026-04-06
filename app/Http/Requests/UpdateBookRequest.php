@@ -26,16 +26,13 @@ class UpdateBookRequest extends FormRequest
             'description' => ['nullable', 'string', 'max:1000'],
             'ISBN' => ['required', 'string', 'max:20', 'unique:books,ISBN,' . $this->route('book')],
             'category_id' => ['nullable', 'integer', 'exists:categories,id'],
-            'total_copies' => ['required', 'integer', 'min:1'],
-            'available_copies' => ['required', 'integer', 'min:0', 'lte:total_copies'],
-            'is_available' => ['required', 'boolean'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'available_copies.lte' => 'Las copias disponibles no pueden ser más que el total.',
+            'title.required' => 'El título es requerido.',
         ];
     }
 }

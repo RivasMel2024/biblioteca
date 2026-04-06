@@ -34,17 +34,6 @@ class ReturnLoanController extends Controller
         $bookCopy = $loan->bookCopy;
         $bookCopy->update(['status' => 'DISPONIBLE']);
 
-        // Actualizar conteo de copias disponibles del libro
-        $book = $bookCopy->book;
-        $availableCopies = $book->copies()
-            ->where('status', 'DISPONIBLE')
-            ->count();
-
-        $book->update([
-            'available_copies' => $availableCopies,
-            'is_available' => $availableCopies > 0,
-        ]);
-
         // Calcular multa si está atrasada
         $fine = null;
         if (now() > $loan->return_date) {

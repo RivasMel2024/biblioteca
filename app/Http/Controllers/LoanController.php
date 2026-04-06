@@ -70,17 +70,6 @@ class LoanController extends Controller
         // Marcar la copia como prestada
         $bookCopy->update(['status' => BookCopy::STATUS_LOANED]);
 
-        // Actualizar el conteo de copias disponibles en el libro
-        $book = $bookCopy->book;
-        $availableCopies = $book->copies()
-            ->where('status', BookCopy::STATUS_AVAILABLE)
-            ->count();
-
-        $book->update([
-            'available_copies' => $availableCopies,
-            'is_available' => $availableCopies > 0,
-        ]);
-
         return response()->json(new LoanResource($loan->load(['user', 'bookCopy.book'])), 201);
     }
 

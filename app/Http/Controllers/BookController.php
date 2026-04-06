@@ -49,9 +49,6 @@ class BookController extends Controller
             'description' => $request->description,
             'ISBN' => $request->ISBN,
             'category_id' => $request->category_id,
-            'total_copies' => $request->total_copies,
-            'available_copies' => $request->total_copies,
-            'is_available' => true,
         ]);
 
         // Crear las copias del libro
