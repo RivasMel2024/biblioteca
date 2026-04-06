@@ -504,7 +504,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Nuevo Libro\",\n  \"description\": \"Descripción del libro\",\n  \"ISBN\": \"978-0-13-345897-6\",\n  \"category_id\": {{category_id}}\n}"
+              "raw": "{\n  \"title\": \"Nuevo Libro\",\n  \"description\": \"Descripción del libro\",\n  \"ISBN\": \"978-0-13-345897-6\",\n  \"category_id\": {{category_id}},\n  \"total_copies\": 3\n}"
             },
             "url": {
               "raw": "{{base_url}}/v1/books",
@@ -866,7 +866,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"title\": \"Orgullo y Prejuicio\",\n  \"description\": \"Novela de Jane Austen publicada en 1813\",\n  \"ISBN\": \"978-0-14-143951-8\",\n  \"category_id\": \"{{new_category_id}}\"\n}"
+                  "raw": "{\n  \"title\": \"Orgullo y Prejuicio\",\n  \"description\": \"Novela de Jane Austen publicada en 1813\",\n  \"ISBN\": \"978-0-14-143951-8\",\n  \"category_id\": \"{{new_category_id}}\",\n  \"total_copies\": 2\n}"
                 },
                 "url": {
                   "raw": "{{base_url}}/v1/books",

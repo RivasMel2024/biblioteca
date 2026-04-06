@@ -64,6 +64,7 @@ class LoanController extends Controller
         $loan = Loan::create([
             'user_id' => $request->user()->id,
             'book_copy_id' => $bookCopy->id,
+            'book_id' => $bookCopy->book_id,
             'return_date' => now()->addDays(self::LOAN_PERIOD_DAYS),
         ]);
 
