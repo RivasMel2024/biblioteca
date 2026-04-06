@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreLoanRequest extends FormRequest
+class UpdateCategoryRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,15 +22,8 @@ class StoreLoanRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'book_copy_id' => ['required', 'integer', 'exists:book_copies,id'],
-        ];
-    }
-
-    public function messages(): array
-    {
-        return [
-            'book_copy_id.required' => 'La copia del libro es requerida.',
-            'book_copy_id.exists' => 'La copia del libro no existe.',
+            'name' => ['required', 'string', 'max:255', 'unique:categories,name,' . $this->route('category')],
+            'description' => ['nullable', 'string', 'max:1000'],
         ];
     }
 }

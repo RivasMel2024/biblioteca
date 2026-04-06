@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreLoanRequest extends FormRequest
+class PayFineRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,15 +22,18 @@ class StoreLoanRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'book_copy_id' => ['required', 'integer', 'exists:book_copies,id'],
+            'amount_paid' => ['required', 'numeric', 'min:0.01'],
+            'payment_method' => ['nullable', 'string', 'max:255'],
+            'reference' => ['nullable', 'string', 'max:255'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'book_copy_id.required' => 'La copia del libro es requerida.',
-            'book_copy_id.exists' => 'La copia del libro no existe.',
+            'amount_paid.required' => 'El monto pagado es requerido.',
+            'amount_paid.numeric' => 'El monto debe ser un número.',
+            'amount_paid.min' => 'El monto debe ser mayor a 0.',
         ];
     }
 }

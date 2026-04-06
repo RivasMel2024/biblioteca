@@ -19,9 +19,14 @@ class BookResource extends JsonResource
             'title' => $this->title,
             'description' => $this->description,
             'ISBN' => $this->ISBN,
+            'category' => new CategoryResource($this->whenLoaded('category')),
+            'category_id' => $this->category_id,
             'total_copies' => $this->total_copies,
             'available_copies' => $this->available_copies,
-            'is_available' => $this->is_available ? 'Disponible' : 'No Disponible'
+            'is_available' => $this->is_available ? 'Disponible' : 'No Disponible',
+            'copies' => BookCopyResource::collection($this->whenLoaded('copies')),
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
     }
 }

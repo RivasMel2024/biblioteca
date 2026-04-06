@@ -13,17 +13,28 @@ class Book extends Model
         'title',
         'description',
         'ISBN',
+        'category_id',
         'total_copies',
         'available_copies',
         'is_available',
     ];
 
-    protected $casts = [    //agregue este cast para que el avilable sea un booleano para la prueba 
+    protected $casts = [
         'is_available' => 'boolean',
     ];
 
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function copies()
+    {
+        return $this->hasMany(BookCopy::class);
+    }
+
     public function loans()
     {
-        return $this->hasMany(Loan::class);
+        return $this->hasManyThrough(Loan::class, BookCopy::class);
     }
 }
