@@ -34,11 +34,12 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('loans', function (Blueprint $table) {
+            // Drop new columns (foreign key constraints are automatically dropped with columns)
             if (Schema::hasColumn('loans', 'user_id')) {
-                $table->dropForeignIdFor('users');
+                $table->dropColumn('user_id');
             }
             if (Schema::hasColumn('loans', 'book_copy_id')) {
-                $table->dropForeignIdFor('book_copies');
+                $table->dropColumn('book_copy_id');
             }
             if (Schema::hasColumn('loans', 'returned_at')) {
                 $table->dropColumn('returned_at');

@@ -13,15 +13,29 @@ class BookSeeder extends Seeder
      */
     public function run(): void
     {
-        Book::factory()->count(90)->create();
+        // Only create factory books if table is empty
+        if (Book::count() === 0) {
+            Book::factory()->count(10)->create();
+        }
 
-        Book::create([
-            'title' => 'Cien años de soledad',
-            'description'   => 'Narra la vida de Jose Arcadio Buendía y su familia a lo largo de siete generaciones en el pueblo ficticio de Macondo.',
-            'ISBN' => '90292040123',
-            'total_copies' => 10,
-            'available_copies' => 10,
-            'is_available' => true,
-        ]);
+        // Use firstOrCreate to avoid duplicates
+        $book = Book::firstOrCreate(
+            ['ISBN' => '90292040123'],
+            [
+                'title' => 'Cien años de soledad',
+                'description' => 'Narra la vida de Jose Arcadio Buendía y su familia a lo largo de siete generaciones en el pueblo ficticio de Macondo.',
+                'category_id' => 1,
+            ]
+        );
+
+        // Create copies only if this book has none
+        if ($book->copies()->count() === 0) {
+            for ($i = 1; $i <= 10; $i++) {
+                $book->copies()->create([
+                    'barcode' => 'BOOK-' . $book->id . '-COPY-' . $i,
+                    'status' => 'DISPONIBLE',
+                ]);
+            }
+        }
     }
 }
