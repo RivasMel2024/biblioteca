@@ -60,9 +60,14 @@ class LoanController extends Controller
             ], 422);
         }
 
+        $canAssignOtherUsers = $request->user()->hasRole('bibliotecario') || $request->user()->can('gestionar usuarios');
+        $loanUserId = $canAssignOtherUsers
+            ? (int) $request->input('user_id', $request->user()->id)
+            : $request->user()->id;
+
         // Crear préstamo con fecha de devolución esperada
         $loan = Loan::create([
-            'user_id' => $request->user()->id,
+            'user_id' => $loanUserId,
             'book_copy_id' => $bookCopy->id,
             'book_id' => $bookCopy->book_id,
             'return_date' => now()->addDays(self::LOAN_PERIOD_DAYS),

@@ -22,6 +22,7 @@ class StoreLoanRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'user_id' => ['nullable', 'integer', 'exists:users,id'],
             'book_copy_id' => ['required', 'integer', 'exists:book_copies,id'],
         ];
     }
@@ -29,8 +30,26 @@ class StoreLoanRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'user_id.exists' => 'El usuario no existe.',
             'book_copy_id.required' => 'La copia del libro es requerida.',
             'book_copy_id.exists' => 'La copia del libro no existe.',
         ];
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $requestedUserId = $this->input('user_id');
+            $user = $this->user();
+
+            if (!$requestedUserId || !$user) {
+                return;
+            }
+
+            $canAssignOtherUsers = $user->hasRole('bibliotecario') || $user->can('gestionar usuarios');
+            if (!$canAssignOtherUsers && (int) $requestedUserId !== (int) $user->id) {
+                $validator->errors()->add('user_id', 'No puedes crear prestamos para otros usuarios.');
+            }
+        });
     }
 }
