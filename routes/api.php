@@ -7,9 +7,11 @@ use App\Http\Controllers\LoanController;
 use App\Http\Controllers\ReturnLoanController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\FineController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
+Route::post('v1/register', [AuthController::class, 'register']);
 Route::post('v1/login', [AuthController::class, 'login']);
 
 // Protected routes
@@ -17,6 +19,9 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     // Auth
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('profile', [AuthController::class, 'profile']);
+
+    // Users (Admin only)
+    Route::apiResource('users', UserController::class)->only(['index', 'show', 'update', 'destroy']);
 
     // Categories (Géneros/Categorías)
     Route::apiResource('categories', CategoryController::class);

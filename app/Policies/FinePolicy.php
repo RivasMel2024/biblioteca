@@ -12,7 +12,7 @@ class FinePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasAnyRole(['bibliotecario', 'estudiante', 'docente']);
+        return $user->can('ver multas');
     }
 
     /**
@@ -20,12 +20,16 @@ class FinePolicy
      */
     public function view(User $user, Fine $fine): bool
     {
+        if (!$user->can('ver multas')) {
+            return false;
+        }
+
         // Estudiantes solo ven sus propias multas
         if ($user->hasRole('estudiante')) {
             return $fine->loan->user_id === $user->id;
         }
 
-        return $user->hasAnyRole(['bibliotecario', 'docente']);
+        return true;
     }
 
     /**
@@ -33,12 +37,15 @@ class FinePolicy
      */
     public function pay(User $user, Fine $fine): bool
     {
+        if (!$user->can('pagar multas')) {
+            return false;
+        }
+
         // El estudiante propietario puede pagar su multa
         if ($user->hasRole('estudiante')) {
             return $fine->loan->user_id === $user->id;
         }
 
-        // Bibliotecarios también pueden procesar pagos
-        return $user->hasRole('bibliotecario');
+        return true;
     }
 }

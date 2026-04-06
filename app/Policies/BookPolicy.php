@@ -12,7 +12,7 @@ class BookPolicy
      */
     public function viewAny(User $user): bool
     {
-        return true;
+        return $user->can('ver libros');
     }
 
     /**
@@ -20,7 +20,7 @@ class BookPolicy
      */
     public function view(User $user, Book $book): bool
     {
-        return true;
+        return $user->can('ver libros');
     }
 
     /**
@@ -28,7 +28,7 @@ class BookPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasRole('bibliotecario');
+        return !$user->hasRole('estudiante') && $user->can('crear libros');
     }
 
     /**
@@ -36,7 +36,7 @@ class BookPolicy
      */
     public function update(User $user, Book $book): bool
     {
-        return $user->hasRole('bibliotecario');
+        return !$user->hasRole('estudiante') && $user->can('editar libros');
     }
 
     /**
@@ -44,7 +44,7 @@ class BookPolicy
      */
     public function delete(User $user, Book $book): bool
     {
-        return $user->hasRole('bibliotecario');
+        return !$user->hasRole('estudiante') && $user->can('eliminar libros');
     }
 
     /**
@@ -52,7 +52,7 @@ class BookPolicy
      */
     public function restore(User $user, Book $book): bool
     {
-        return $user->hasRole('bibliotecario');
+        return !$user->hasRole('estudiante') && $user->can('eliminar libros');
     }
 
     /**
@@ -60,6 +60,6 @@ class BookPolicy
      */
     public function forceDelete(User $user, Book $book): bool
     {
-        return $user->hasRole('bibliotecario');
+        return !$user->hasRole('estudiante') && $user->can('eliminar libros');
     }
 }

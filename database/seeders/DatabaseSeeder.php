@@ -21,17 +21,25 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
         ]);
 
+        // Crear un admin (idempotent)
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@biblioteca.com'],
+            [
+                'name' => 'Administrador Sistema',
+                'password' => bcrypt('password123'),
+            ]
+        );
+        $admin->syncRoles(['admin']);
+
         // Crear un bibliotecario (idempotent)
         $bibliotecario = User::firstOrCreate(
             ['email' => 'bibliotecario@biblioteca.com'],
             [
-                'name' => 'Bibliotecario Admin',
+                'name' => 'Bibliotecario',
                 'password' => bcrypt('password123'),
             ]
         );
-        if (!$bibliotecario->hasRole('bibliotecario')) {
-            $bibliotecario->assignRole('bibliotecario');
-        }
+        $bibliotecario->syncRoles(['bibliotecario']);
 
         // Crear un estudiante (idempotent)
         $estudiante = User::firstOrCreate(
@@ -41,28 +49,12 @@ class DatabaseSeeder extends Seeder
                 'password' => bcrypt('password123'),
             ]
         );
-        if (!$estudiante->hasRole('estudiante')) {
-            $estudiante->assignRole('estudiante');
-        }
-
-        // Crear un docente (idempotent)
-        $docente = User::firstOrCreate(
-            ['email' => 'docente@biblioteca.com'],
-            [
-                'name' => 'María Docente',
-                'password' => bcrypt('password123'),
-            ]
-        );
-        if (!$docente->hasRole('docente')) {
-            $docente->assignRole('docente');
-        }
+        $estudiante->syncRoles(['estudiante']);
 
         // Crear usuarios adicionales de prueba solo si hay menos de 10 usuarios
         if (User::count() < 10) {
-            User::factory(7)->create()->each(function ($user) {
-                if (!$user->hasAnyRole(['estudiante', 'docente'])) {
-                    $user->assignRole(fake()->randomElement(['estudiante', 'docente']));
-                }
+            User::factory(7)->create()->each(function (User $user) {
+                $user->syncRoles([fake()->randomElement(['estudiante', 'bibliotecario'])]);
             });
         }
 

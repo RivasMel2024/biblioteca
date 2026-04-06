@@ -55,7 +55,7 @@ class Book extends Model
     {
         return Attribute::make(
             get: fn () => $this->copies()
-                ->where('status', BookCopy::°°)
+                ->where('status', BookCopy::STATUS_AVAILABLE)
                 ->count(),
         );
     }

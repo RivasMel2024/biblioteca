@@ -3,8 +3,9 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class UpdateBookRequest extends FormRequest
+class RegisterRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,17 +23,10 @@ class UpdateBookRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string', 'max:1000'],
-            'ISBN' => ['required', 'string', 'max:20', 'unique:books,ISBN,' . $this->route('book')->id],
-            'category_id' => ['nullable', 'integer', 'exists:categories,id'],
-        ];
-    }
-
-    public function messages(): array
-    {
-        return [
-            'title.required' => 'El título es requerido.',
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'role' => ['nullable', 'string', Rule::in(['admin', 'bibliotecario', 'estudiante'])],
         ];
     }
 }

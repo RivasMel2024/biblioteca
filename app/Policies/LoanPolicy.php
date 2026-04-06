@@ -12,7 +12,7 @@ class LoanPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasAnyRole(['bibliotecario', 'estudiante', 'docente']);
+        return $user->can('ver prestamos');
     }
 
     /**
@@ -20,16 +20,24 @@ class LoanPolicy
      */
     public function view(User $user, Loan $loan): bool
     {
-        return $user->hasAnyRole(['bibliotecario', 'estudiante', 'docente']);
+        if (!$user->can('ver prestamos')) {
+            return false;
+        }
+
+        if ($user->hasRole('estudiante')) {
+            return $loan->user_id === $user->id;
+        }
+
+        return true;
     }
 
     /**
      * Determine whether the user can create loans.
-     * Solo estudiantes y docentes pueden solicitar préstamos de libros.
+    * Estudiantes y bibliotecarios pueden solicitar préstamos de libros.
      */
     public function create(User $user): bool
     {
-        return $user->hasAnyRole(['estudiante', 'docente']);
+        return $user->can('crear prestamos');
     }
 
     /**
@@ -38,7 +46,7 @@ class LoanPolicy
      */
     public function update(User $user, Loan $loan): bool
     {
-        return $user->hasRole('bibliotecario');
+        return false;
     }
 
     /**
@@ -47,16 +55,24 @@ class LoanPolicy
      */
     public function delete(User $user, Loan $loan): bool
     {
-        return $user->hasRole('bibliotecario');
+        return false;
     }
 
     /**
      * Determine whether the user can return a loan.
-     * Estudiantes, docentes y bibliotecarios pueden devolver libros.
+     * Solo usuarios con permiso de devolución.
      */
     public function return(User $user, Loan $loan): bool
     {
-        return $user->hasAnyRole(['bibliotecario', 'estudiante', 'docente']);
+        if (!$user->can('devolver prestamos')) {
+            return false;
+        }
+
+        if ($user->hasRole('estudiante')) {
+            return $loan->user_id === $user->id;
+        }
+
+        return true;
     }
 
     /**
@@ -64,7 +80,7 @@ class LoanPolicy
      */
     public function restore(User $user, Loan $loan): bool
     {
-        return $user->hasRole('bibliotecario');
+        return false;
     }
 
     /**
@@ -72,6 +88,6 @@ class LoanPolicy
      */
     public function forceDelete(User $user, Loan $loan): bool
     {
-        return $user->hasRole('bibliotecario');
+        return false;
     }
 }

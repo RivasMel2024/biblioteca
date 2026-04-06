@@ -12,7 +12,7 @@ class CategoryPolicy
      */
     public function viewAny(User $user): bool
     {
-        return true; // Todos pueden ver categorías
+        return $user->can('ver categorias');
     }
 
     /**
@@ -20,7 +20,7 @@ class CategoryPolicy
      */
     public function view(User $user, Category $category): bool
     {
-        return true;
+        return $user->can('ver categorias');
     }
 
     /**
@@ -28,7 +28,7 @@ class CategoryPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasRole('bibliotecario');
+        return !$user->hasRole('estudiante') && $user->can('crear categorias');
     }
 
     /**
@@ -36,7 +36,7 @@ class CategoryPolicy
      */
     public function update(User $user, Category $category): bool
     {
-        return $user->hasRole('bibliotecario');
+        return !$user->hasRole('estudiante') && $user->can('editar categorias');
     }
 
     /**
@@ -44,6 +44,6 @@ class CategoryPolicy
      */
     public function delete(User $user, Category $category): bool
     {
-        return $user->hasRole('bibliotecario');
+        return !$user->hasRole('estudiante') && $user->can('eliminar categorias');
     }
 }

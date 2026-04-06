@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
@@ -13,46 +14,76 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        // Crear roles
+        // Roles
+        $admin = Role::firstOrCreate(['name' => 'admin']);
         $bibliotecario = Role::firstOrCreate(['name' => 'bibliotecario']);
         $estudiante = Role::firstOrCreate(['name' => 'estudiante']);
-        $docente = Role::firstOrCreate(['name' => 'docente']);
 
-        // Crear permisos para libros
+        // Migrar rol legacy vendedor -> bibliotecario
+        /** @var Role|null $legacyRole */
+        $legacyRole = Role::where('name', 'vendedor')->first();
+        if ($legacyRole) {
+            User::role('vendedor')->get()->each(function (User $user) {
+                $user->syncRoles(['bibliotecario']);
+            });
+
+            $legacyRole->delete();
+        }
+
+        // Permisos usuarios
+        $manageUsers = Permission::firstOrCreate(['name' => 'gestionar usuarios']);
+
+        // Permisos catalogo
+        $viewCategories = Permission::firstOrCreate(['name' => 'ver categorias']);
+        $createCategories = Permission::firstOrCreate(['name' => 'crear categorias']);
+        $editCategories = Permission::firstOrCreate(['name' => 'editar categorias']);
+        $deleteCategories = Permission::firstOrCreate(['name' => 'eliminar categorias']);
+
+        // Permisos libros/copias
+        $viewBooks = Permission::firstOrCreate(['name' => 'ver libros']);
         $createBooks = Permission::firstOrCreate(['name' => 'crear libros']);
         $editBooks = Permission::firstOrCreate(['name' => 'editar libros']);
         $deleteBooks = Permission::firstOrCreate(['name' => 'eliminar libros']);
-        $viewBooks = Permission::firstOrCreate(['name' => 'ver libros']);
 
-        // Crear permisos para préstamos
-        $createLoans = Permission::firstOrCreate(['name' => 'crear prestamos']);
+        // Permisos prestamos
         $viewLoans = Permission::firstOrCreate(['name' => 'ver prestamos']);
+        $createLoans = Permission::firstOrCreate(['name' => 'crear prestamos']);
         $returnLoans = Permission::firstOrCreate(['name' => 'devolver prestamos']);
 
-        // Asignar permisos al Bibliotecario (puede hacer todo)
+        // Permisos multas
+        $viewFines = Permission::firstOrCreate(['name' => 'ver multas']);
+        $payFines = Permission::firstOrCreate(['name' => 'pagar multas']);
+
+        // Admin: solo administracion de usuarios
+        $admin->syncPermissions([
+            $manageUsers,
+        ]);
+
+        // Bibliotecario: sistema de prestamos, copias/libros y multas
         $bibliotecario->syncPermissions([
+            $viewCategories,
+            $createCategories,
+            $editCategories,
+            $deleteCategories,
+            $viewBooks,
             $createBooks,
             $editBooks,
             $deleteBooks,
-            $viewBooks,
             $viewLoans,
+            $createLoans,
             $returnLoans,
+            $viewFines,
+            $payFines,
         ]);
 
-        // Asignar permisos al Estudiante (solo puede ver libros y crear préstamos)
+        // Estudiante: crear prestamos y pagar multas (ademas de consultar su info)
         $estudiante->syncPermissions([
+            $viewCategories,
             $viewBooks,
             $createLoans,
             $viewLoans,
-            $returnLoans,
-        ]);
-
-        // Asignar permisos al Docente (igual que estudiante)
-        $docente->syncPermissions([
-            $viewBooks,
-            $createLoans,
-            $viewLoans,
-            $returnLoans,
+            $viewFines,
+            $payFines,
         ]);
     }
 }
