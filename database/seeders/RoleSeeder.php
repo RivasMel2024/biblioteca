@@ -59,7 +59,7 @@ class RoleSeeder extends Seeder
             $manageUsers,
         ]);
 
-        // Bibliotecario: sistema de prestamos, copias/libros y multas
+        // Bibliotecario: sistema de prestamos, copias/libros y multas (sin pago)
         $bibliotecario->syncPermissions([
             $viewCategories,
             $createCategories,
@@ -73,7 +73,6 @@ class RoleSeeder extends Seeder
             $createLoans,
             $returnLoans,
             $viewFines,
-            $payFines,
         ]);
 
         // Estudiante: crear prestamos y pagar multas (ademas de consultar su info)

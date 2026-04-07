@@ -18,7 +18,7 @@ class FineResource extends JsonResource
             'id' => $this->id,
             'loan_id' => $this->loan_id,
             'loan' => new LoanResource($this->whenLoaded('loan')),
-            'days_overdue' => $this->days_overdue,
+            'days_overdue' => (int) $this->days_overdue,
             'daily_amount' => (float) $this->daily_amount,
             'total_amount' => (float) $this->total_amount,
             'status' => $this->status,

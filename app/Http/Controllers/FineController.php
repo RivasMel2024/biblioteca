@@ -54,13 +54,14 @@ class FineController extends Controller
         }
 
         $amountPaid = $request->input('amount_paid');
+        $amountPaidRounded = number_format((float) $amountPaid, 2, '.', '');
+        $totalAmountRounded = number_format((float) $fine->total_amount, 2, '.', '');
 
-        if ($amountPaid < $fine->total_amount) {
+        if ($amountPaidRounded !== $totalAmountRounded) {
             return response()->json([
-                'message' => 'El monto pagado es menor al total de la multa.',
-                'fine_amount' => $fine->total_amount,
-                'amount_paid' => $amountPaid,
-                'remaining' => $fine->total_amount - $amountPaid,
+                'message' => 'El monto pagado debe ser exacto.',
+                'fine_amount' => (float) $fine->total_amount,
+                'amount_paid' => (float) $amountPaid,
             ], 422);
         }
 
@@ -72,7 +73,7 @@ class FineController extends Controller
         return response()->json([
             'message' => 'Multa pagada con éxito.',
             'fine' => new FineResource($fine),
-            'change' => $amountPaid - $fine->total_amount,
+            'change' => 0,
         ], 200);
     }
 }

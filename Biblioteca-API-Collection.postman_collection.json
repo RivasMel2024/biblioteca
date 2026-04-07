@@ -764,16 +764,30 @@
         {
           "name": "Pagar Multa",
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{estudiante_token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
             "header": [
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{}"
+              "raw": "{\n  \"amount_paid\": 100\n}"
             },
             "url": {
               "raw": "{{base_url}}/v1/fines/{{fine_id}}/pay",
@@ -1038,16 +1052,30 @@
             {
               "name": "3. Pagar Multa",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{estudiante_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [
                   {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
                   }
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{}"
+                  "raw": "{\n  \"amount_paid\": 100\n}"
                 },
                 "url": {
                   "raw": "{{base_url}}/v1/fines/{{fine_id}}/pay",

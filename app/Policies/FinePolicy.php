@@ -41,11 +41,6 @@ class FinePolicy
             return false;
         }
 
-        // El estudiante propietario puede pagar su multa
-        if ($user->hasRole('estudiante')) {
-            return $fine->loan->user_id === $user->id;
-        }
-
-        return true;
+        return $user->hasRole('estudiante') && $fine->loan->user_id === $user->id;
     }
 }

@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 class ReturnLoanController extends Controller
 {
     // Monto diario de la multa por atraso
-    private const DAILY_FINE_AMOUNT = 5000; // En la moneda local del sistema
+    private const DAILY_FINE_AMOUNT = 3; // En la moneda local del sistema
 
     /**
      * Handle the incoming request.
@@ -37,7 +37,8 @@ class ReturnLoanController extends Controller
         // Calcular multa si está atrasada
         $fine = null;
         if (now() > $loan->return_date) {
-            $daysOverdue = now()->diffInDays($loan->return_date);
+            $daysOverdue = (int) ceil($loan->return_date->diffInDays(now()));
+            $daysOverdue = max(1, $daysOverdue);
             $totalAmount = $daysOverdue * self::DAILY_FINE_AMOUNT;
 
             $fine = Fine::create([
