@@ -1,0 +1,1575 @@
+openapi: 3.0.3
+info:
+  title: Biblioteca API
+  version: 1.0.0
+  description: |
+    Documentacion OpenAPI para la API de biblioteca (Laravel + Sanctum).
+    Incluye autenticacion Bearer, ejemplos de peticiones/respuestas y estructuras paginadas.
+  contact:
+    name: ''
+    url: ''
+    email: ''
+  termsOfService: ''
+  license:
+    name: ''
+    url: ''
+servers:
+  - url: 'http://localhost:8000'
+    description: Local Statgin
+  - url: 'http://backend-practica4.test'
+    description: Local domain
+  - url: 'http://127.0.0.1:8081/api'
+    description: Development
+tags:
+  - name: Auth
+    description: 'Registro, login, perfil y cierre de sesion.'
+  - name: Users
+    description: Gestion de usuarios (principalmente admin).
+  - name: Categories
+    description: CRUD de categorias o generos literarios.
+  - name: Books
+    description: CRUD de libros y consulta de copias disponibles.
+  - name: Loans
+    description: Gestion de prestamos y devoluciones.
+  - name: Fines
+    description: Consulta y pago de multas.
+security:
+  - bearerAuth: []
+paths:
+  /v1/register:
+    post:
+      tags:
+        - Auth
+      summary: Register user
+      description: Crea un usuario y devuelve un token de acceso.
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+            examples:
+              registerStudent:
+                $ref: '#/components/examples/RegisterStudentRequest'
+      responses:
+        '201':
+          description: User registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+              examples:
+                registered:
+                  $ref: '#/components/examples/RegisterResponseOk'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+      security: []
+  /v1/login:
+    post:
+      tags:
+        - Auth
+      summary: Login
+      description: Autentica al usuario y devuelve token Bearer.
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              loginDefault:
+                $ref: '#/components/examples/LoginRequestDefault'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+              examples:
+                success:
+                  $ref: '#/components/examples/LoginResponseOk'
+        '422':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              examples:
+                invalidCredentials:
+                  value:
+                    message: Invalid credentials
+  /v1/logout:
+    post:
+      tags:
+        - Auth
+      summary: Logout and revoke all tokens
+      operationId: logout
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /v1/profile:
+    get:
+      tags:
+        - Auth
+      summary: Get authenticated user profile
+      operationId: getProfile
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/AuthUser'
+                required:
+                  - user
+              examples:
+                profile:
+                  $ref: '#/components/examples/ProfileResponseOk'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /v1/users:
+    get:
+      tags:
+        - Users
+      summary: List users (admin only)
+      operationId: listUsers
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: email
+          schema:
+            type: string
+        - in: query
+          name: name
+          schema:
+            type: string
+        - in: query
+          name: role
+          schema:
+            $ref: '#/components/schemas/RoleName'
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Paginated users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUsers'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  '/v1/users/{user}':
+    get:
+      tags:
+        - Users
+      summary: Get user by ID
+      operationId: getUser
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: User detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags:
+        - Users
+      summary: Update user
+      operationId: updateUserPut
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateUserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    patch:
+      tags:
+        - Users
+      summary: Partially update user
+      operationId: updateUserPatch
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateUserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    delete:
+      tags:
+        - Users
+      summary: Delete user
+      operationId: deleteUser
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: User deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/categories:
+    get:
+      tags:
+        - Categories
+      summary: List categories
+      operationId: listCategories
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Paginated categories
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCategories'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags:
+        - Categories
+      summary: Create category
+      operationId: createCategory
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreCategoryRequest'
+      responses:
+        '201':
+          description: Category created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  '/v1/categories/{category}':
+    get:
+      tags:
+        - Categories
+      summary: Get category by ID
+      operationId: getCategory
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CategoryId'
+      responses:
+        '200':
+          description: Category detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags:
+        - Categories
+      summary: Update category
+      operationId: updateCategoryPut
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CategoryId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCategoryRequest'
+      responses:
+        '200':
+          description: Category updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    patch:
+      tags:
+        - Categories
+      summary: Partially update category
+      operationId: updateCategoryPatch
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CategoryId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCategoryRequest'
+      responses:
+        '200':
+          description: Category updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    delete:
+      tags:
+        - Categories
+      summary: Delete category
+      operationId: deleteCategory
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CategoryId'
+      responses:
+        '200':
+          description: Category deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/books:
+    get:
+      tags:
+        - Books
+      summary: List books
+      operationId: listBooks
+      parameters:
+        - in: query
+          name: title
+          schema:
+            type: string
+        - in: query
+          name: isbn
+          schema:
+            type: string
+        - in: query
+          name: category_id
+          schema:
+            type: integer
+        - in: query
+          name: is_available
+          schema:
+            type: boolean
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Paginated books
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBooks'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags:
+        - Books
+      summary: Create book
+      operationId: createBook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreBookRequest'
+            examples:
+              createBook:
+                $ref: '#/components/examples/CreateBookRequest'
+      responses:
+        '201':
+          description: Book created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+              examples:
+                created:
+                  $ref: '#/components/examples/BookCreatedResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  '/v1/books/{book}':
+    get:
+      tags:
+        - Books
+      summary: Get book by ID
+      operationId: getBook
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BookId'
+      responses:
+        '200':
+          description: Book detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags:
+        - Books
+      summary: Update book
+      operationId: updateBookPut
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BookId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBookRequest'
+      responses:
+        '200':
+          description: Book updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateBookResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    patch:
+      tags:
+        - Books
+      summary: Partially update book
+      operationId: updateBookPatch
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BookId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBookRequest'
+      responses:
+        '200':
+          description: Book updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateBookResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    delete:
+      tags:
+        - Books
+      summary: Delete book
+      operationId: deleteBook
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BookId'
+      responses:
+        '200':
+          description: Book deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: Book has active loans
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+  '/v1/books/{book}/copies':
+    get:
+      tags:
+        - Books
+      summary: Get available copies for a book
+      operationId: getBookCopies
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BookId'
+      responses:
+        '200':
+          description: Available copies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookCopy'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/loans:
+    get:
+      tags:
+        - Loans
+      summary: List loans
+      operationId: listLoans
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum:
+              - active
+              - returned
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Paginated loans
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedLoans'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags:
+        - Loans
+      summary: Create loan
+      operationId: createLoan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreLoanRequest'
+            examples:
+              createLoan:
+                $ref: '#/components/examples/CreateLoanRequest'
+      responses:
+        '201':
+          description: Loan created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Loan'
+              examples:
+                created:
+                  $ref: '#/components/examples/LoanCreatedResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  '/v1/loans/{loan}':
+    get:
+      tags:
+        - Loans
+      summary: Get loan by ID
+      operationId: getLoan
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/LoanId'
+      responses:
+        '200':
+          description: Loan detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Loan'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  '/v1/loans/{loan}/return':
+    post:
+      tags:
+        - Loans
+      summary: Return loan and generate fine if overdue
+      operationId: returnLoan
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/LoanId'
+      responses:
+        '200':
+          description: Loan returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReturnLoanResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: Loan already returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+  /v1/fines:
+    get:
+      tags:
+        - Fines
+      summary: List fines
+      operationId: listFines
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum:
+              - PENDIENTE
+              - PAGADA
+              - CONDONADA
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Paginated fines
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedFines'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  '/v1/fines/{fine}':
+    get:
+      tags:
+        - Fines
+      summary: Get fine by ID
+      operationId: getFine
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/FineId'
+      responses:
+        '200':
+          description: Fine detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fine'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  '/v1/fines/{fine}/pay':
+    post:
+      tags:
+        - Fines
+      summary: Pay a fine
+      operationId: payFine
+      parameters:
+        - $ref: '#/components/parameters/FineId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PayFineRequest'
+            examples:
+              cashPayment:
+                $ref: '#/components/examples/PayFineRequestCash'
+      responses:
+        '200':
+          description: Fine paid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PayFineResponse'
+              examples:
+                paid:
+                  $ref: '#/components/examples/PayFineResponseOk'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: Invalid amount or fine already processed
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/MessageResponse'
+                  - $ref: '#/components/schemas/PayFineAmountErrorResponse'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: digest
+      bearerFormat: Token
+  parameters:
+    UserId:
+      in: path
+      name: user
+      required: true
+      schema:
+        type: integer
+    CategoryId:
+      in: path
+      name: category
+      required: true
+      schema:
+        type: integer
+    BookId:
+      in: path
+      name: book
+      required: true
+      schema:
+        type: integer
+    LoanId:
+      in: path
+      name: loan
+      required: true
+      schema:
+        type: integer
+    FineId:
+      in: path
+      name: fine
+      required: true
+      schema:
+        type: integer
+  responses:
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MessageResponse'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MessageResponse'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MessageResponse'
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationErrorResponse'
+          examples:
+            validationError:
+              $ref: '#/components/examples/ValidationErrorGeneric'
+  examples:
+    RegisterStudentRequest:
+      summary: Registro de estudiante
+      value:
+        name: Ana Perez
+        email: ana@example.com
+        password: secret123
+        password_confirmation: secret123
+        role: estudiante
+    RegisterResponseOk:
+      summary: Registro exitoso
+      value:
+        message: Usuario registrado exitosamente.
+        access_token: 1|token_generado
+        token_type: Bearer
+        user:
+          id: 12
+          name: Ana Perez
+          email: ana@example.com
+          email_verified_at: null
+          created_at: '2026-04-07T13:10:25.000000Z'
+          updated_at: '2026-04-07T13:10:25.000000Z'
+          roles:
+            - id: 3
+              name: estudiante
+              guard_name: web
+    LoginRequestDefault:
+      summary: Login basico
+      value:
+        email: admin@example.com
+        password: secret123
+    LoginResponseOk:
+      summary: Login exitoso
+      value:
+        access_token: 1|token_login
+        token_type: Bearer
+        user:
+          id: 1
+          name: Admin
+          email: admin@example.com
+          email_verified_at: null
+          created_at: '2026-03-01T11:00:00.000000Z'
+          updated_at: '2026-03-01T11:00:00.000000Z'
+          roles:
+            - id: 1
+              name: admin
+              guard_name: web
+    ProfileResponseOk:
+      summary: Perfil autenticado
+      value:
+        user:
+          id: 1
+          name: Admin
+          email: admin@example.com
+          email_verified_at: null
+          created_at: '2026-03-01T11:00:00.000000Z'
+          updated_at: '2026-03-01T11:00:00.000000Z'
+          roles:
+            - id: 1
+              name: admin
+              guard_name: web
+    CreateBookRequest:
+      summary: Crear libro con copias
+      value:
+        title: Clean Code
+        description: Manual de buenas practicas de desarrollo.
+        ISBN: '9780132350884'
+        category_id: 2
+        total_copies: 5
+    BookCreatedResponse:
+      summary: Libro creado
+      value:
+        id: 24
+        title: Clean Code
+        description: Manual de buenas practicas de desarrollo.
+        ISBN: '9780132350884'
+        category:
+          id: 2
+          name: Ingenieria de Software
+          description: Libros de programacion y arquitectura
+          books_count: null
+          created_at: '2026-03-05T10:10:10.000000Z'
+          updated_at: '2026-03-05T10:10:10.000000Z'
+        category_id: 2
+        total_copies: 5
+        available_copies: 5
+        is_available: Disponible
+        copies: []
+        created_at: '2026-04-07T13:30:00.000000Z'
+        updated_at: '2026-04-07T13:30:00.000000Z'
+    CreateLoanRequest:
+      summary: Crear prestamo
+      value:
+        book_copy_id: 101
+    LoanCreatedResponse:
+      summary: Prestamo creado
+      value:
+        id: 77
+        user_id: 12
+        book_copy_id: 101
+        created_at: '2026-04-07T14:00:00.000000Z'
+        return_date: '2026-05-02T14:00:00.000000Z'
+        returned_at: null
+        is_active: true
+        is_overdue: false
+        updated_at: '2026-04-07T14:00:00.000000Z'
+    PayFineRequestCash:
+      summary: Pago de multa
+      value:
+        amount_paid: 15000
+        payment_method: efectivo
+        reference: CAJA-2026-001
+    PayFineResponseOk:
+      summary: Multa pagada
+      value:
+        message: Multa pagada con exito.
+        fine:
+          id: 9
+          loan_id: 77
+          days_overdue: 2
+          daily_amount: 5000
+          total_amount: 10000
+          status: PAGADA
+          is_paid: true
+          paid_at: '2026-04-07T15:00:00.000000Z'
+          created_at: '2026-04-07T14:30:00.000000Z'
+          updated_at: '2026-04-07T15:00:00.000000Z'
+        change: 5000
+    ValidationErrorGeneric:
+      summary: Error de validacion
+      value:
+        message: The given data was invalid.
+        errors:
+          email:
+            - The email field is required.
+  schemas:
+    RoleName:
+      type: string
+      enum:
+        - admin
+        - bibliotecario
+        - estudiante
+    RegisterRequest:
+      type: object
+      required:
+        - name
+        - email
+        - password
+      properties:
+        name:
+          type: string
+          maxLength: 255
+        email:
+          type: string
+          format: email
+          maxLength: 255
+        password:
+          type: string
+          minLength: 8
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+    UpdateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 255
+        email:
+          type: string
+          format: email
+        role:
+          $ref: '#/components/schemas/RoleName'
+    StoreCategoryRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+          maxLength: 1000
+          nullable: true
+    UpdateCategoryRequest:
+      allOf:
+        - $ref: '#/components/schemas/StoreCategoryRequest'
+    StoreBookRequest:
+      type: object
+      required:
+        - title
+        - ISBN
+        - total_copies
+      properties:
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+          maxLength: 1000
+          nullable: true
+        ISBN:
+          type: string
+          maxLength: 20
+        category_id:
+          type: integer
+          nullable: true
+        total_copies:
+          type: integer
+          minimum: 1
+    UpdateBookRequest:
+      type: object
+      required:
+        - title
+        - ISBN
+      properties:
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+          maxLength: 1000
+          nullable: true
+        ISBN:
+          type: string
+          maxLength: 20
+        category_id:
+          type: integer
+          nullable: true
+    StoreLoanRequest:
+      type: object
+      required:
+        - book_copy_id
+      properties:
+        book_copy_id:
+          type: integer
+    PayFineRequest:
+      type: object
+      required:
+        - amount_paid
+      properties:
+        amount_paid:
+          type: number
+          format: float
+          minimum: 0.01
+        payment_method:
+          type: string
+          maxLength: 255
+          nullable: true
+        reference:
+          type: string
+          maxLength: 255
+          nullable: true
+    AuthRole:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        guard_name:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+    AuthUser:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        email_verified_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuthRole'
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        roles:
+          type: array
+          items:
+            type: string
+        created_at:
+          type: string
+          format: date-time
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        books_count:
+          type: integer
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    BookCopy:
+      type: object
+      properties:
+        id:
+          type: integer
+        book_id:
+          type: integer
+        barcode:
+          type: string
+        status:
+          type: string
+          example: DISPONIBLE
+        is_available:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    Book:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        ISBN:
+          type: string
+        category:
+          $ref: '#/components/schemas/Category'
+        category_id:
+          type: integer
+          nullable: true
+        total_copies:
+          type: integer
+        available_copies:
+          type: integer
+        is_available:
+          type: string
+          example: Disponible
+        copies:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookCopy'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    Loan:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        user:
+          $ref: '#/components/schemas/User'
+        book_copy_id:
+          type: integer
+        book_copy:
+          $ref: '#/components/schemas/BookCopy'
+        book:
+          $ref: '#/components/schemas/Book'
+        created_at:
+          type: string
+          format: date-time
+        return_date:
+          type: string
+          format: date-time
+        returned_at:
+          type: string
+          format: date-time
+          nullable: true
+        is_active:
+          type: boolean
+        is_overdue:
+          type: boolean
+        fine:
+          $ref: '#/components/schemas/Fine'
+        updated_at:
+          type: string
+          format: date-time
+    Fine:
+      type: object
+      properties:
+        id:
+          type: integer
+        loan_id:
+          type: integer
+        days_overdue:
+          type: integer
+        daily_amount:
+          type: number
+          format: float
+        total_amount:
+          type: number
+          format: float
+        status:
+          type: string
+          enum:
+            - PENDIENTE
+            - PAGADA
+            - CONDONADA
+        is_paid:
+          type: boolean
+        paid_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    RegisterResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        access_token:
+          type: string
+        token_type:
+          type: string
+          example: Bearer
+        user:
+          $ref: '#/components/schemas/AuthUser'
+    LoginResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+          example: Bearer
+        user:
+          $ref: '#/components/schemas/AuthUser'
+    UpdateUserResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/User'
+    UpdateBookResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/Book'
+    ReturnLoanResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        loan:
+          $ref: '#/components/schemas/Loan'
+        fine:
+          $ref: '#/components/schemas/Fine'
+    PayFineResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        fine:
+          $ref: '#/components/schemas/Fine'
+        change:
+          type: number
+          format: float
+    PayFineAmountErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        fine_amount:
+          type: number
+          format: float
+        amount_paid:
+          type: number
+          format: float
+        remaining:
+          type: number
+          format: float
+    ValidationErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+    PaginationLinks:
+      type: object
+      properties:
+        first:
+          type: string
+          nullable: true
+        last:
+          type: string
+          nullable: true
+        prev:
+          type: string
+          nullable: true
+        next:
+          type: string
+          nullable: true
+    PaginationMeta:
+      type: object
+      properties:
+        current_page:
+          type: integer
+        from:
+          type: integer
+          nullable: true
+        last_page:
+          type: integer
+        links:
+          type: array
+          items:
+            type: object
+            properties:
+              url:
+                type: string
+                nullable: true
+              label:
+                type: string
+              active:
+                type: boolean
+        path:
+          type: string
+        per_page:
+          type: integer
+        to:
+          type: integer
+          nullable: true
+        total:
+          type: integer
+    PaginatedUsers:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+    PaginatedCategories:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Category'
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+    PaginatedBooks:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Book'
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+    PaginatedLoans:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Loan'
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+    PaginatedFines:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Fine'
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
