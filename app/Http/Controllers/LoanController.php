@@ -31,7 +31,7 @@ class LoanController extends Controller
             })
             ->when($request->user()->hasRole('estudiante'), function ($query) {
                 // Los estudiantes solo ven sus propios préstamos
-                $query->where('user_id', $query->user()->id);
+                $query->where('user_id', request()->user()->id);
             })
             ->orderByDesc('created_at')
             ->paginate();

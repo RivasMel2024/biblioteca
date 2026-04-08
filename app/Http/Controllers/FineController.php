@@ -23,7 +23,7 @@ class FineController extends Controller
             })
             ->when($request->user()->hasRole('estudiante'), function ($query) {
                 // Los estudiantes solo ven sus propias multas
-                $query->whereHas('loan', fn ($q) => $q->where('user_id', $query->user()->id));
+                $query->whereHas('loan', fn ($q) => $q->where('user_id', request()->user()->id));
             })
             ->paginate();
 
