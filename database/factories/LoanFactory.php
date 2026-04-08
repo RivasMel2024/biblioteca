@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\BookCopy;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -16,8 +18,15 @@ class LoanFactory extends Factory
      */
     public function definition(): array
     {
+        $copy = BookCopy::factory();
+
         return [
-            //
+            'user_id' => User::factory(),
+            'book_id' => $copy->book_id,
+            'book_copy_id' => $copy,
+            'return_date' => now()->addDays(7),
+            'returned_at' => null,
         ];
     }
 }
+
