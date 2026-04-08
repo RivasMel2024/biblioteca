@@ -18,20 +18,14 @@ class LoanFactory extends Factory
      */
     public function definition(): array
     {
-        $copy = BookCopy::factory();
+        $copy = BookCopy::factory()->create();
 
         return [
-<<<<<<< HEAD
-            'requester_name' => $this->faker->name(),
-            'book_id' => Book::factory(),
-            'return_at' => null,
-=======
             'user_id' => User::factory(),
             'book_id' => $copy->book_id,
             'book_copy_id' => $copy,
             'return_date' => now()->addDays(7),
             'returned_at' => null,
->>>>>>> origin/ale
         ];
     }
 }

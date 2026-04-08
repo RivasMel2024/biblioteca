@@ -934,8 +934,6 @@ components:
         name: Ana Perez
         email: ana@example.com
         password: secret123
-        password_confirmation: secret123
-        role: estudiante
     RegisterResponseOk:
       summary: Registro exitoso
       value:
