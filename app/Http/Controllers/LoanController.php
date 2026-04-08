@@ -65,7 +65,16 @@ class LoanController extends Controller
             ? (int) $request->input('user_id', $request->user()->id)
             : $request->user()->id;
 
-        // Crear préstamo con fecha de devolución esperada
+        $hasPendingFines = \App\Models\Fine::whereHas('loan', function ($query) use ($loanUserId) {
+            $query->where('user_id', $loanUserId);
+        })->where('status', \App\Models\Fine::STATUS_PENDING)->exists();
+
+        if ($hasPendingFines) {
+            return response()->json([
+                'message' => 'No se puede procesar el préstamo porque el usuario tiene multas pendientes.'
+            ], 422);
+        }
+
         $loan = Loan::create([
             'user_id' => $loanUserId,
             'book_copy_id' => $bookCopy->id,
@@ -73,7 +82,6 @@ class LoanController extends Controller
             'return_date' => now()->addDays(self::LOAN_PERIOD_DAYS),
         ]);
 
-        // Marcar la copia como prestada
         $bookCopy->update(['status' => BookCopy::STATUS_LOANED]);
 
         return response()->json(new LoanResource($loan->load(['user', 'bookCopy.book'])), 201);

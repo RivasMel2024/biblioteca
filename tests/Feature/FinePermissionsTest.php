@@ -139,9 +139,20 @@ class FinePermissionsTest extends TestCase
         ])->assertStatus(403);
     }
 
-    public function test_f9_multa_pendiente_bloquea_nuevo_prestamo_pendiente_regla_futura(): void
+    public function test_f9_multa_pendiente_bloquea_nuevo_prestamo(): void
     {
-        $this->markTestIncomplete('Regla pendiente: bloquear nuevos prestamos si hay multas pendientes.');
+        $student = $this->createUserWithRole('estudiante');
+    
+        $this->createPendingFineForUser($student);
+
+        $newCopy = $this->createAvailableCopy();
+        
+        $response = $this->actingAs($student)->postJson('/api/v1/loans', [
+            'book_copy_id' => $newCopy->id,
+        ]);
+
+        $response->assertStatus(422)
+                ->assertJsonPath('message', 'No se puede procesar el préstamo porque el usuario tiene multas pendientes.');
     }
 
     public function test_f10_flujo_prestamo_vencido_devolucion_multa_pago_y_nuevo_prestamo(): void
