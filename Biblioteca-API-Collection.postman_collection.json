@@ -18,6 +18,9 @@
     {
       "name": "AUTENTICACION",
       "description": "Endpoints de autenticación - Login, Register, Logout",
+      "auth": {
+        "type": "noauth"
+      },
       "item": [
         {
           "name": "Register - Crear Usuario",
@@ -236,6 +239,16 @@
     {
       "name": "USUARIOS",
       "description": "Gestión de usuarios - Solo Admin",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{admin_token}}",
+            "type": "string"
+          }
+        ]
+      },
       "item": [
         {
           "name": "Listar Usuarios",
@@ -324,6 +337,16 @@
     {
       "name": "CATEGORIAS",
       "description": "CRUD de Categorías de Libros",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{bibliotecario_token}}",
+            "type": "string"
+          }
+        ]
+      },
       "item": [
         {
           "name": "Listar Categorías",
@@ -446,6 +469,16 @@
     {
       "name": "LIBROS",
       "description": "CRUD de Libros",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{bibliotecario_token}}",
+            "type": "string"
+          }
+        ]
+      },
       "item": [
         {
           "name": "Listar Libros",
@@ -598,6 +631,16 @@
     {
       "name": "PRESTAMOS",
       "description": "Gestión de préstamos de libros",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{bibliotecario_token}}",
+            "type": "string"
+          }
+        ]
+      },
       "item": [
         {
           "name": "Listar Préstamos",
@@ -710,6 +753,16 @@
     {
       "name": "MULTAS",
       "description": "Gestión de multas por atraso en devolución",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{bibliotecario_token}}",
+            "type": "string"
+          }
+        ]
+      },
       "item": [
         {
           "name": "Listar Multas",
@@ -802,6 +855,16 @@
     {
       "name": "CASOS DE PRUEBA - FLUJOS COMPLETOS",
       "description": "Flujos de prueba para validar la integración completa del sistema",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{admin_token}}",
+            "type": "string"
+          }
+        ]
+      },
       "item": [
         {
           "name": "FLUJO 1: Autenticación Completa",
@@ -1186,6 +1249,16 @@
     {
       "name": "CASOS DE ERROR Y VALIDACION",
       "description": "Pruebas de manejo de errores y validaciones",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{admin_token}}",
+            "type": "string"
+          }
+        ]
+      },
       "item": [
         {
           "name": "Sin Autenticación - Acceso denegado",
@@ -1294,6 +1367,22 @@
     {
       "key": "base_url",
       "value": "http://biblioteca.test/api"
+    },
+    {
+      "key": "admin_token",
+      "value": ""
+    },
+    {
+      "key": "bibliotecario_token",
+      "value": ""
+    },
+    {
+      "key": "estudiante_token",
+      "value": ""
+    },
+    {
+      "key": "user_token",
+      "value": ""
     },
     {
       "key": "new_category_id",
