@@ -7,6 +7,39 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    private function removeDuplicateRoles(string $table, string $modelMorphKey, bool $teams, string $teamForeignKey): void
+    {
+        $groupBy = ['model_type', $modelMorphKey];
+
+        if ($teams) {
+            $groupBy[] = $teamForeignKey;
+        }
+
+        /** @var Collection<int, object> $duplicates */
+        $duplicates = DB::table($table)
+            ->select(array_merge($groupBy, [DB::raw('MAX(role_id) as keep_role_id')]))
+            ->groupBy($groupBy)
+            ->havingRaw('COUNT(*) > 1')
+            ->get();
+
+        foreach ($duplicates as $duplicate) {
+            $query = DB::table($table)
+                ->where('model_type', $duplicate->model_type)
+                ->where($modelMorphKey, $duplicate->{$modelMorphKey})
+                ->where('role_id', '!=', $duplicate->keep_role_id);
+
+            if ($teams) {
+                if ($duplicate->{$teamForeignKey} === null) {
+                    $query->whereNull($teamForeignKey);
+                } else {
+                    $query->where($teamForeignKey, $duplicate->{$teamForeignKey});
+                }
+            }
+
+            $query->delete();
+        }
+    }
+
     /**
      * Run the migrations.
      */
@@ -25,7 +58,7 @@ return new class extends Migration
         }
 
         if ($teams) {
-            DB::statement("DELETE m1 FROM {$modelHasRolesTable} m1 INNER JOIN {$modelHasRolesTable} m2 ON m1.{$teamForeignKey} = m2.{$teamForeignKey} AND m1.model_type = m2.model_type AND m1.{$modelMorphKey} = m2.{$modelMorphKey} AND m1.role_id < m2.role_id");
+            $this->removeDuplicateRoles($modelHasRolesTable, $modelMorphKey, true, $teamForeignKey);
 
             Schema::table($modelHasRolesTable, function (Blueprint $table) use ($teamForeignKey, $modelMorphKey) {
                 $table->unique([$teamForeignKey, 'model_type', $modelMorphKey], 'model_has_roles_single_role_per_model');
@@ -34,7 +67,7 @@ return new class extends Migration
             return;
         }
 
-        DB::statement("DELETE m1 FROM {$modelHasRolesTable} m1 INNER JOIN {$modelHasRolesTable} m2 ON m1.model_type = m2.model_type AND m1.{$modelMorphKey} = m2.{$modelMorphKey} AND m1.role_id < m2.role_id");
+        $this->removeDuplicateRoles($modelHasRolesTable, $modelMorphKey, false, $teamForeignKey);
 
         Schema::table($modelHasRolesTable, function (Blueprint $table) use ($modelMorphKey) {
             $table->unique(['model_type', $modelMorphKey], 'model_has_roles_single_role_per_model');
