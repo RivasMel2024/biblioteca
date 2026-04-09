@@ -25,7 +25,7 @@ return new class extends Migration
         }
 
         if ($teams) {
-            DB::statement("DELETE m1 FROM {$modelHasRolesTable} m1 INNER JOIN {$modelHasRolesTable} m2 ON m1.{$teamForeignKey} = m2.{$teamForeignKey} AND m1.model_type = m2.model_type AND m1.{$modelMorphKey} = m2.{$modelMorphKey} AND m1.role_id < m2.role_id");
+            DB::statement("DELETE FROM {$modelHasRolesTable} WHERE EXISTS (SELECT 1 FROM {$modelHasRolesTable} m2 WHERE m2.{$teamForeignKey} = {$modelHasRolesTable}.{$teamForeignKey} AND m2.model_type = {$modelHasRolesTable}.model_type AND m2.{$modelMorphKey} = {$modelHasRolesTable}.{$modelMorphKey} AND {$modelHasRolesTable}.role_id < m2.role_id)");
 
             Schema::table($modelHasRolesTable, function (Blueprint $table) use ($teamForeignKey, $modelMorphKey) {
                 $table->unique([$teamForeignKey, 'model_type', $modelMorphKey], 'model_has_roles_single_role_per_model');
@@ -34,7 +34,7 @@ return new class extends Migration
             return;
         }
 
-        DB::statement("DELETE m1 FROM {$modelHasRolesTable} m1 INNER JOIN {$modelHasRolesTable} m2 ON m1.model_type = m2.model_type AND m1.{$modelMorphKey} = m2.{$modelMorphKey} AND m1.role_id < m2.role_id");
+        DB::statement("DELETE FROM {$modelHasRolesTable} WHERE EXISTS (SELECT 1 FROM {$modelHasRolesTable} m2 WHERE m2.model_type = {$modelHasRolesTable}.model_type AND m2.{$modelMorphKey} = {$modelHasRolesTable}.{$modelMorphKey} AND {$modelHasRolesTable}.role_id < m2.role_id)");
 
         Schema::table($modelHasRolesTable, function (Blueprint $table) use ($modelMorphKey) {
             $table->unique(['model_type', $modelMorphKey], 'model_has_roles_single_role_per_model');
